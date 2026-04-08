@@ -1,16 +1,35 @@
 "use client";
 
-import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
+import { useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Camera } from "lucide-react";
 import { useSession } from "@/lib/store";
+import { resizeImageFile } from "@/lib/image";
 
 export default function Home() {
+  const router = useRouter();
   const dimension = useSession((s) => s.dimension);
   const setDimension = useSession((s) => s.setDimension);
+  const setSource = useSession((s) => s.setSource);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    setBusy(true);
+    try {
+      const resized = await resizeImageFile(f);
+      setSource(resized.dataUrl, resized.mimeType, "photo");
+      router.push("/spec");
+    } catch (err) {
+      alert("이미지 처리 실패: " + (err instanceof Error ? err.message : err));
+      setBusy(false);
+    }
+  };
 
   return (
     <main className="h-[100dvh] max-w-md mx-auto flex flex-col px-6 pt-safe pb-safe">
-      {/* Hero */}
       <section className="pt-10 pb-6 rise rise-1">
         <div className="eyebrow mb-3">Partition Visualizer</div>
         <h1 className="display-tight text-[22px] mb-2">칸막이 시뮬레이터</h1>
@@ -19,23 +38,16 @@ export default function Home() {
         </p>
       </section>
 
-      {/* Dimension selector */}
       <section className="mb-5 rise rise-2">
         <div className="field-label mb-2">
           <span>형태 선택</span>
           <span className="unit">Dimension</span>
         </div>
         <div className="seg grid-cols-2">
-          <button
-            onClick={() => setDimension(1)}
-            data-active={dimension === 1}
-          >
+          <button onClick={() => setDimension(1)} data-active={dimension === 1}>
             1차원 · 직선
           </button>
-          <button
-            onClick={() => setDimension(2)}
-            data-active={dimension === 2}
-          >
+          <button onClick={() => setDimension(2)} data-active={dimension === 2}>
             2차원 · ㄴ 형태
           </button>
         </div>
@@ -46,31 +58,36 @@ export default function Home() {
         )}
       </section>
 
-      {/* Primary CTA — fills remaining space */}
-      <Link
-        href="/capture?kind=photo"
-        className="flex-1 min-h-0 flex rise rise-3 group"
-      >
-        <div className="surface-raised p-6 w-full flex flex-col justify-between transition-all group-active:translate-y-[1px]">
-          <div className="flex items-start justify-between">
-            <div>
-              <div className="eyebrow mb-2">Start</div>
-              <div className="display text-[18px] leading-[1.15]">
-                현장 사진 업로드
-              </div>
-            </div>
-            <div className="btn-icon shrink-0">
-              <ArrowUpRight size={18} strokeWidth={2} />
-            </div>
-          </div>
-          <div className="flex items-center justify-between pt-4 border-t border-[var(--line)]">
-            <span className="caption">카메라 · 갤러리</span>
-            <span className="mono text-[11px] text-[var(--muted)]">01 / 04</span>
-          </div>
-        </div>
-      </Link>
+      <input
+        ref={fileRef}
+        type="file"
+        accept=".png,.jpg,.jpeg,image/png,image/jpeg"
+        capture="environment"
+        onChange={handleFile}
+        className="hidden"
+      />
 
-      {/* Footer */}
+      <div className="flex-1 min-h-0 flex items-center justify-center rise rise-3">
+        <button
+          onClick={() => fileRef.current?.click()}
+          disabled={busy}
+          className="flex flex-col items-center gap-5 active:scale-95 transition disabled:opacity-50"
+        >
+          <div
+            className="w-28 h-28 rounded-full bg-[var(--ink)] text-[var(--bg)] flex items-center justify-center"
+            style={{ boxShadow: "var(--shadow-cta)" }}
+          >
+            <Camera size={44} strokeWidth={1.5} />
+          </div>
+          <div className="text-center">
+            <div className="display text-[20px] leading-none mb-1.5">
+              {busy ? "불러오는 중…" : "촬영 또는 선택"}
+            </div>
+            <div className="eyebrow">Tap to start</div>
+          </div>
+        </button>
+      </div>
+
       <footer className="pt-4 pb-3 flex items-center justify-between rise rise-4">
         <span className="text-[11px] text-[var(--muted)]">화담 디자인</span>
         <span className="mono text-[11px] text-[var(--muted)]">© 2026</span>

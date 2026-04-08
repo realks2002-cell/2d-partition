@@ -78,7 +78,7 @@ export default function SpecPage() {
   const corridorMm = Math.max(0, spec.siteWidthMm - totalW);
 
   const setPanelCount = (n: number) => {
-    const v = Math.max(1, Math.min(10, n));
+    const v = Math.max(1, Math.min(30, n));
     setSpec({
       panelCount: v,
       doorPanelIndex: Math.min(spec.doorPanelIndex, v),
@@ -88,7 +88,7 @@ export default function SpecPage() {
   const setSiteWidth = (siteWidthMm: number) => {
     const auto = Math.max(
       1,
-      Math.min(10, Math.round(siteWidthMm / spec.panelWidthMm)),
+      Math.min(30, Math.round(siteWidthMm / spec.panelWidthMm)),
     );
     setSpec({
       siteWidthMm,
@@ -100,7 +100,7 @@ export default function SpecPage() {
   const setPanelWidth = (panelWidthMm: PanelWidthMm) => {
     const auto = Math.max(
       1,
-      Math.min(10, Math.round(spec.siteWidthMm / panelWidthMm)),
+      Math.min(30, Math.round(spec.siteWidthMm / panelWidthMm)),
     );
     setSpec({
       panelWidthMm,
@@ -221,28 +221,8 @@ export default function SpecPage() {
         )}
       </Section>
 
-      {/* 01 — Placement */}
-      <Section idx="01" title="설치 위치 지정">
-        <PlacementCanvas
-          imageUrl={sourceImage}
-          placement={placement}
-          onChange={setPlacement}
-          heightRatio={
-            spec.siteHeightMm > 0 ? spec.heightMm / spec.siteHeightMm : 0.85
-          }
-          panelCount={spec.panelCount}
-          doorPanelIndex={spec.doorPanelIndex}
-          frameTier={spec.frameTier}
-          widthRatio={
-            spec.siteWidthMm > 0 ? totalWidthMm(spec) / spec.siteWidthMm : 1
-          }
-          startSide={spec.startSide}
-          frameColor={spec.frameColor}
-        />
-      </Section>
-
-      {/* 02 — Site dimensions */}
-      <Section idx="02" title="현장 치수">
+      {/* 01 — Site dimensions */}
+      <Section idx="01" title="현장 치수">
         <div className="grid grid-cols-2 gap-3">
           <NumField
             label="현장 폭"
@@ -259,8 +239,8 @@ export default function SpecPage() {
         </div>
       </Section>
 
-      {/* 03 — Panel composition */}
-      <Section idx="03" title="칸 구성">
+      {/* 02 — Panel composition */}
+      <Section idx="02" title="칸 구성">
         <div className="mb-3">
           <div className="field-label">
             <span>패널 1칸 기본 폭</span>
@@ -315,8 +295,8 @@ export default function SpecPage() {
         />
       </Section>
 
-      {/* 04 — Frame color */}
-      <Section idx="04" title="프레임 색상">
+      {/* 03 — Frame color */}
+      <Section idx="03" title="프레임 색상">
         <div className="grid grid-cols-3 gap-2">
           {COLOR_OPTIONS.map((c) => {
             const active = spec.frameColor === c.value;
@@ -335,8 +315,8 @@ export default function SpecPage() {
         </div>
       </Section>
 
-      {/* 05 — Frame tier */}
-      <Section idx="05" title="프레임 단수">
+      {/* 04 — Frame tier */}
+      <Section idx="04" title="프레임 단수">
         <div className="seg grid-cols-2">
           {([1, 2] as FrameTier[]).map((t) => (
             <button
@@ -350,8 +330,8 @@ export default function SpecPage() {
         </div>
       </Section>
 
-      {/* 06 — Start side */}
-      <Section idx="06" title="벽 내 시작 방향">
+      {/* 05 — Start side */}
+      <Section idx="05" title="벽 내 시작 방향">
         <div className="seg grid-cols-3">
           {(["left", "center", "right"] as StartSide[]).map((s) => (
             <button
@@ -373,8 +353,8 @@ export default function SpecPage() {
         )}
       </Section>
 
-      {/* 07 — Door position */}
-      <Section idx="07" title="도어 위치">
+      {/* 06 — Door position */}
+      <Section idx="06" title="도어 위치">
         <div className="flex flex-wrap gap-2">
           <button
             onClick={() => setSpec({ doorPanelIndex: 0 })}
@@ -398,6 +378,26 @@ export default function SpecPage() {
             );
           })}
         </div>
+      </Section>
+
+      {/* 07 — Placement (moved to bottom) */}
+      <Section idx="07" title="설치 위치 지정">
+        <PlacementCanvas
+          imageUrl={sourceImage}
+          placement={placement}
+          onChange={setPlacement}
+          heightRatio={
+            spec.siteHeightMm > 0 ? spec.heightMm / spec.siteHeightMm : 0.85
+          }
+          panelCount={spec.panelCount}
+          doorPanelIndex={spec.doorPanelIndex}
+          frameTier={spec.frameTier}
+          widthRatio={
+            spec.siteWidthMm > 0 ? totalWidthMm(spec) / spec.siteWidthMm : 1
+          }
+          startSide={spec.startSide}
+          frameColor={spec.frameColor}
+        />
       </Section>
 
       {error && (
@@ -449,7 +449,7 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="mb-5">
+    <section className="mb-4">
       <div className="section-head">
         <span className="idx">{idx}</span>
         <span className="title">{title}</span>

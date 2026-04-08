@@ -252,7 +252,7 @@ export async function burnPlacementOntoImage(
     ctx.stroke();
   }
 
-  // 6) door cell highlight (cyan) — quadrilateral cell
+  // 6) door cell — frame-colored outline only (no fill) to avoid color bleed
   if (
     panelCount >= 1 &&
     doorPanelIndex >= 1 &&
@@ -264,16 +264,14 @@ export async function burnPlacementOntoImage(
     const dbr = quadPt(uR, 0);
     const dtr = quadPt(uR, 1);
     const dtl = quadPt(uL, 1);
-    ctx.fillStyle = "rgba(0, 204, 255, 0.5)";
+    ctx.strokeStyle = LIME; // frame color (from above)
+    ctx.lineWidth = Math.max(5, Math.round(strokeW * 1.2));
     ctx.beginPath();
     ctx.moveTo(dbl.x, dbl.y);
     ctx.lineTo(dbr.x, dbr.y);
     ctx.lineTo(dtr.x, dtr.y);
     ctx.lineTo(dtl.x, dtl.y);
     ctx.closePath();
-    ctx.fill();
-    ctx.strokeStyle = "#00ccff";
-    ctx.lineWidth = Math.max(4, Math.round(strokeW * 0.9));
     ctx.stroke();
   }
 

@@ -34,6 +34,7 @@ export default function SharePage() {
   const downloadBlob = async (url: string, name: string) => {
     try {
       await saveImage(url, name);
+      alert("저장되었습니다.");
     } catch (e) {
       alert("저장 실패: " + (e instanceof Error ? e.message : String(e)));
     }

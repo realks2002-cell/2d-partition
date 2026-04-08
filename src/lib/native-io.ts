@@ -13,29 +13,19 @@ function dataUrlToBase64(dataUrl: string): { base64: string; mime: string } {
 }
 
 /**
- * Save image to device. On native, writes to the Documents directory and
- * offers a share sheet so the user can re-save to gallery/drive.
- * On web, triggers a browser download.
+ * Save image to device. On native, writes directly to the Documents/Hwadam
+ * folder (no share sheet). On web, triggers a browser download.
+ * Returns the file URI.
  */
 export async function saveImage(dataUrl: string, filename: string) {
   if (isNative()) {
     const { base64 } = dataUrlToBase64(dataUrl);
     const result = await Filesystem.writeFile({
-      path: filename,
+      path: `Hwadam/${filename}`,
       data: base64,
       directory: Directory.Documents,
       recursive: true,
     });
-    try {
-      await Share.share({
-        title: "칸막이 시뮬레이션 저장",
-        text: "이미지를 앨범에 저장하거나 공유하세요",
-        url: result.uri,
-        dialogTitle: "저장 / 공유",
-      });
-    } catch {
-      // user cancelled share sheet — file is still saved in Documents
-    }
     return result.uri;
   }
   // Web fallback

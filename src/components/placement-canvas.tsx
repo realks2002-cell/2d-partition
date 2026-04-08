@@ -56,6 +56,13 @@ export function PlacementCanvas({
   const [drawing, setDrawing] = useState(false);
   const [start, setStart] = useState<Point | null>(null);
   const [current, setCurrent] = useState<Point | null>(null);
+  // When dragging an existing handle (stage === 'done'):
+  // 'b1' = bottom point #1, 'b2' = bottom point #2, 't1' = top #1, 't2' = top #2
+  const [draggingHandle, setDraggingHandle] = useState<
+    "b1" | "b2" | "t1" | "t2" | null
+  >(null);
+
+  const HANDLE_RADIUS = 16; // hit test radius (px)
 
   // determine current stage from placement
   const hasBottom = !!placement;
@@ -255,7 +262,7 @@ export function PlacementCanvas({
         ctx.setLineDash([]);
       }
 
-      // door cell highlight
+      // door cell — frame-colored thicker outline (no fill, matches final render)
       if (
         panelCount >= 1 &&
         doorPanelIndex >= 1 &&
@@ -267,22 +274,58 @@ export function PlacementCanvas({
         const dbr = qp(uR, 0);
         const dtr = qp(uR, 1);
         const dtl = qp(uL, 1);
-        ctx.fillStyle = DOOR_FILL;
+        ctx.strokeStyle = mullionColor;
+        ctx.lineWidth = 4;
+        ctx.setLineDash([]);
         ctx.beginPath();
         ctx.moveTo(dbl.x, dbl.y);
         ctx.lineTo(dbr.x, dbr.y);
         ctx.lineTo(dtr.x, dtr.y);
         ctx.lineTo(dtl.x, dtl.y);
         ctx.closePath();
-        ctx.fill();
-        ctx.strokeStyle = DOOR_STROKE;
-        ctx.lineWidth = 2.5;
         ctx.stroke();
       }
 
       // draw bottom line (orange) and top line (cyan) guide lines
       drawSegment(bl, br, LINE_COLOR);
       if (hasTop) drawSegment(tl, tr, TOP_COLOR);
+
+      // draw large handles when done, to indicate draggable corners
+      if (stage === "done" && placement) {
+        const handles: Point[] = [
+          { x: placement.x1 * size.w, y: placement.y1 * size.h },
+          { x: placement.x2 * size.w, y: placement.y2 * size.h },
+        ];
+        if (
+          placement.topX1 !== undefined &&
+          placement.topY1 !== undefined &&
+          placement.topX2 !== undefined &&
+          placement.topY2 !== undefined
+        ) {
+          handles.push({
+            x: placement.topX1 * size.w,
+            y: placement.topY1 * size.h,
+          });
+          handles.push({
+            x: placement.topX2 * size.w,
+            y: placement.topY2 * size.h,
+          });
+        }
+        handles.forEach((h, i) => {
+          const color = i < 2 ? LINE_COLOR : TOP_COLOR;
+          ctx.fillStyle = "#ffffff";
+          ctx.beginPath();
+          ctx.arc(h.x, h.y, 10, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 3;
+          ctx.stroke();
+          ctx.fillStyle = color;
+          ctx.beginPath();
+          ctx.arc(h.x, h.y, 4, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      }
     }
 
     // in-progress drag
@@ -312,22 +355,101 @@ export function PlacementCanvas({
     return { x: e.clientX - rect.left, y: e.clientY - rect.top };
   };
 
+  // Find which handle (if any) is near a given point
+  const hitHandle = (
+    p: Point,
+  ): "b1" | "b2" | "t1" | "t2" | null => {
+    if (!placement) return null;
+    const candidates: {
+      id: "b1" | "b2" | "t1" | "t2";
+      x: number;
+      y: number;
+    }[] = [
+      { id: "b1", x: placement.x1 * size.w, y: placement.y1 * size.h },
+      { id: "b2", x: placement.x2 * size.w, y: placement.y2 * size.h },
+    ];
+    if (
+      placement.topX1 !== undefined &&
+      placement.topY1 !== undefined &&
+      placement.topX2 !== undefined &&
+      placement.topY2 !== undefined
+    ) {
+      candidates.push({
+        id: "t1",
+        x: placement.topX1 * size.w,
+        y: placement.topY1 * size.h,
+      });
+      candidates.push({
+        id: "t2",
+        x: placement.topX2 * size.w,
+        y: placement.topY2 * size.h,
+      });
+    }
+    let nearest: "b1" | "b2" | "t1" | "t2" | null = null;
+    let minDist = HANDLE_RADIUS;
+    for (const c of candidates) {
+      const d = Math.hypot(c.x - p.x, c.y - p.y);
+      if (d <= minDist) {
+        minDist = d;
+        nearest = c.id;
+      }
+    }
+    return nearest;
+  };
+
   const onPointerDown = (e: React.PointerEvent) => {
-    if (stage === "done") return; // require clear first
     e.preventDefault();
     canvasRef.current?.setPointerCapture(e.pointerId);
     const p = getPoint(e);
+
+    // If completed, try to grab an existing handle
+    if (stage === "done") {
+      const handle = hitHandle(p);
+      if (handle) {
+        setDraggingHandle(handle);
+        return;
+      }
+      return; // tap outside any handle → no action
+    }
+
+    // Otherwise start a new line draw (bottom or top stage)
     setStart(p);
     setCurrent(p);
     setDrawing(true);
   };
 
   const onPointerMove = (e: React.PointerEvent) => {
-    if (!drawing) return;
-    setCurrent(getPoint(e));
+    const p = getPoint(e);
+    if (draggingHandle && placement) {
+      const nx = p.x / size.w;
+      const ny = p.y / size.h;
+      const next = { ...placement };
+      if (draggingHandle === "b1") {
+        next.x1 = nx;
+        next.y1 = ny;
+      } else if (draggingHandle === "b2") {
+        next.x2 = nx;
+        next.y2 = ny;
+      } else if (draggingHandle === "t1") {
+        next.topX1 = nx;
+        next.topY1 = ny;
+      } else if (draggingHandle === "t2") {
+        next.topX2 = nx;
+        next.topY2 = ny;
+      }
+      onChange(next);
+      return;
+    }
+    if (drawing) {
+      setCurrent(p);
+    }
   };
 
   const onPointerUp = (e: React.PointerEvent) => {
+    if (draggingHandle) {
+      setDraggingHandle(null);
+      return;
+    }
     if (!drawing || !start) return;
     const end = getPoint(e);
     setDrawing(false);
@@ -371,10 +493,10 @@ export function PlacementCanvas({
 
   const stageHint =
     stage === "bottom"
-      ? "Step 1 — 바닥 라인을 드래그하세요 (칸막이가 바닥에 닿는 선)"
+      ? "Step 1 — 바닥 라인을 드래그하세요"
       : stage === "top"
-        ? "Step 2 — 천장 라인을 드래그하세요 (칸막이 윗변)"
-        : "✓ 완료 · 자홍=칸막이 사다리꼴, 하늘색=도어 위치";
+        ? "Step 2 — 천장 라인을 드래그하세요"
+        : "✓ 점을 드래그해서 위치 조정";
 
   return (
     <div className="space-y-2">
