@@ -5,7 +5,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useSession } from "@/lib/store";
 import { useHydrateImages } from "@/lib/use-hydrate-images";
-import { authHeaders } from "@/lib/api-client";
+import { apiUrl, authHeaders } from "@/lib/api-client";
 import { ArrowRight, ArrowLeft, Loader2, RotateCw, Check } from "lucide-react";
 
 export default function ResultPage() {
@@ -44,7 +44,7 @@ export default function ResultPage() {
     setError(null);
     try {
       const [, b64] = selectedRendering.split(",");
-      const res = await fetch("/api/render", {
+      const res = await fetch(apiUrl("/api/render"), {
         method: "POST",
         headers: authHeaders(),
         body: JSON.stringify({

@@ -78,6 +78,7 @@ export async function burnPlacementOntoImage(
   siteWidthMm: number = 0,
   partitionWidthMm: number = 0,
   startSide: "left" | "right" | "center" = "right",
+  frameColor: "black" | "white" | "dark-gray" = "black",
 ): Promise<{ dataUrl: string; base64: string; mimeType: string }> {
   const img = await new Promise<HTMLImageElement>((resolve, reject) => {
     const i = new Image();
@@ -213,8 +214,15 @@ export async function burnPlacementOntoImage(
   ctx.stroke();
   ctx.setLineDash([]);
 
-  // 5) internal structure — lime mullions
-  const LIME = "#00ff88";
+  // 5) internal structure — drawn in the target frame color
+  // so that even if the AI preserves these strokes, they become
+  // correct mullions in the output.
+  const FRAME_HEX: Record<string, string> = {
+    black: "#111111",
+    white: "#f5f5f5",
+    "dark-gray": "#3a3a3a",
+  };
+  const LIME = FRAME_HEX[frameColor];
   ctx.lineCap = "butt";
 
   // vertical panel dividers (interpolated along top/bottom edges)

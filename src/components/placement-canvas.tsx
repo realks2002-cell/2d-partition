@@ -14,6 +14,7 @@ interface Props {
   frameTier: 1 | 2;
   widthRatio?: number; // partitionWidthMm / siteWidthMm (0~1)
   startSide?: "left" | "right" | "center";
+  frameColor?: "black" | "white" | "dark-gray";
 }
 
 const LINE_COLOR = "#f97316"; // orange (bottom)
@@ -40,7 +41,14 @@ export function PlacementCanvas({
   frameTier,
   widthRatio = 1,
   startSide = "right",
+  frameColor = "black",
 }: Props) {
+  const mullionColor =
+    frameColor === "white"
+      ? "#888888"
+      : frameColor === "dark-gray"
+        ? "#3a3a3a"
+        : "#111111";
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imgRef = useRef<HTMLImageElement | null>(null);
@@ -218,9 +226,9 @@ export function PlacementCanvas({
 
       // vertical panel dividers
       if (panelCount > 1) {
-        ctx.strokeStyle = RECT_STROKE;
-        ctx.lineWidth = 1.5;
-        ctx.setLineDash([4, 4]);
+        ctx.strokeStyle = mullionColor;
+        ctx.lineWidth = 2;
+        ctx.setLineDash([]);
         for (let i = 1; i < panelCount; i++) {
           const u = i / panelCount;
           const pB = qp(u, 0);
@@ -237,9 +245,9 @@ export function PlacementCanvas({
       if (frameTier === 2) {
         const pL = qp(0, 0.8);
         const pR = qp(1, 0.8);
-        ctx.strokeStyle = RECT_STROKE;
-        ctx.lineWidth = 2;
-        ctx.setLineDash([6, 4]);
+        ctx.strokeStyle = mullionColor;
+        ctx.lineWidth = 2.5;
+        ctx.setLineDash([]);
         ctx.beginPath();
         ctx.moveTo(pL.x, pL.y);
         ctx.lineTo(pR.x, pR.y);
@@ -296,6 +304,7 @@ export function PlacementCanvas({
     startSide,
     hasTop,
     stage,
+    mullionColor,
   ]);
 
   const getPoint = (e: React.PointerEvent): Point => {

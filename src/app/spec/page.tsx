@@ -5,7 +5,7 @@ import { useRef, useState } from "react";
 import Link from "next/link";
 import { useSession } from "@/lib/store";
 import { useHydrateImages } from "@/lib/use-hydrate-images";
-import { authHeaders } from "@/lib/api-client";
+import { apiUrl, authHeaders } from "@/lib/api-client";
 import { burnPlacementOntoImage, resizeImageFile } from "@/lib/image";
 import { PlacementCanvas } from "@/components/placement-canvas";
 import {
@@ -127,6 +127,7 @@ export default function SpecPage() {
           spec.siteWidthMm,
           totalWidthMm(spec),
           spec.startSide,
+          spec.frameColor,
         );
         imageBase64 = burned.base64;
         imageMimeType = burned.mimeType;
@@ -136,7 +137,7 @@ export default function SpecPage() {
         imageMimeType = sourceMimeType ?? "image/jpeg";
       }
       const drawingB64 = drawingImage?.split(",")[1];
-      const res = await fetch("/api/render", {
+      const res = await fetch(apiUrl("/api/render"), {
         method: "POST",
         headers: authHeaders(),
         body: JSON.stringify({
@@ -236,6 +237,7 @@ export default function SpecPage() {
             spec.siteWidthMm > 0 ? totalWidthMm(spec) / spec.siteWidthMm : 1
           }
           startSide={spec.startSide}
+          frameColor={spec.frameColor}
         />
       </Section>
 

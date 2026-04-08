@@ -6,6 +6,7 @@ import { useSession, type CompletedSegment } from "@/lib/store";
 import { useHydrateImages } from "@/lib/use-hydrate-images";
 import { totalWidthMm } from "@/lib/prompt-builder";
 import { ElevationSvg } from "@/components/elevation-svg";
+import { saveImage, shareImage } from "@/lib/native-io";
 import { Download, Share2, Home, ArrowLeft } from "lucide-react";
 
 export default function SharePage() {
@@ -30,29 +31,20 @@ export default function SharePage() {
     );
   }
 
-  const downloadBlob = (url: string, name: string) => {
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = name;
-    a.click();
+  const downloadBlob = async (url: string, name: string) => {
+    try {
+      await saveImage(url, name);
+    } catch (e) {
+      alert("저장 실패: " + (e instanceof Error ? e.message : String(e)));
+    }
   };
 
   const shareSingle = async (url: string, label: string) => {
-    if (typeof navigator !== "undefined" && "share" in navigator) {
-      try {
-        const blob = await (await fetch(url)).blob();
-        const file = new File([blob], `${label}.png`, { type: "image/png" });
-        await navigator.share({
-          title: "칸막이 시뮬레이션",
-          text: label,
-          files: [file],
-        });
-      } catch (e) {
-        console.error(e);
-        downloadBlob(url, `${label}.png`);
-      }
-    } else {
-      downloadBlob(url, `${label}.png`);
+    try {
+      await shareImage(url, `${label}.png`, "칸막이 시뮬레이션");
+    } catch (e) {
+      console.error(e);
+      alert("공유 실패: " + (e instanceof Error ? e.message : String(e)));
     }
   };
 
