@@ -9,39 +9,19 @@ export default function Home() {
   const setDimension = useSession((s) => s.setDimension);
 
   return (
-    <main className="min-h-screen max-w-md mx-auto flex flex-col px-6 pt-safe">
-      {/* Top brand bar */}
-      <header className="flex items-center justify-between pt-6 pb-2 rise">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-full bg-[var(--ink)] flex items-center justify-center">
-            <span className="serif text-[var(--surface)] text-[13px] font-semibold tracking-tight">
-              H
-            </span>
-          </div>
-          <span className="wordmark">Hwadam</span>
-        </div>
-        <div className="chip-soft">
-          <span className="w-1.5 h-1.5 rounded-full bg-[var(--success)] dot-pulse" />
-          Ready
-        </div>
-      </header>
-
+    <main className="h-[100dvh] max-w-md mx-auto flex flex-col px-6 pt-safe pb-safe">
       {/* Hero */}
-      <section className="pt-16 pb-14 rise rise-1">
-        <div className="eyebrow mb-5">Partition Visualizer</div>
-        <h1 className="display-tight text-[22px] mb-3">
-          칸막이 시뮬레이터
-        </h1>
-        <p className="text-[15px] leading-[1.65] text-[var(--ink-3)] max-w-[300px]">
-          현장 사진 한 장으로 시공 완료 모습을
-          <br />
-          즉시 렌더링합니다.
+      <section className="pt-10 pb-6 rise rise-1">
+        <div className="eyebrow mb-3">Partition Visualizer</div>
+        <h1 className="display-tight text-[22px] mb-2">칸막이 시뮬레이터</h1>
+        <p className="text-[13px] leading-[1.55] text-[var(--ink-3)]">
+          현장 사진 한 장으로 시공 후 모습을 즉시 렌더링합니다.
         </p>
       </section>
 
       {/* Dimension selector */}
-      <section className="mb-8 rise rise-2">
-        <div className="field-label mb-2.5">
+      <section className="mb-5 rise rise-2">
+        <div className="field-label mb-2">
           <span>형태 선택</span>
           <span className="unit">Dimension</span>
         </div>
@@ -60,42 +40,40 @@ export default function Home() {
           </button>
         </div>
         {dimension === 2 && (
-          <p className="mt-3 caption">
-            벽마다 다른 사진 2장을 순차로 촬영해 세그먼트 1 → 2 순으로 진행합니다.
+          <p className="mt-2 text-[11.5px] leading-[1.5] text-[var(--muted)]">
+            벽마다 다른 사진 2장을 순차로 촬영합니다.
           </p>
         )}
       </section>
 
-      {/* Primary CTA */}
+      {/* Primary CTA — fills remaining space */}
       <Link
         href="/capture?kind=photo"
-        className="block rise rise-3 group"
+        className="flex-1 min-h-0 flex rise rise-3 group"
       >
-        <div className="surface-raised p-7 transition-all group-active:translate-y-[1px]">
-          <div className="flex items-start justify-between mb-10">
+        <div className="surface-raised p-6 w-full flex flex-col justify-between transition-all group-active:translate-y-[1px]">
+          <div className="flex items-start justify-between">
             <div>
               <div className="eyebrow mb-2">Start</div>
-              <div className="display text-[18px] leading-[1]">
+              <div className="display text-[18px] leading-[1.15]">
                 현장 사진 업로드
               </div>
             </div>
-            <div className="btn-icon shrink-0 mt-1">
+            <div className="btn-icon shrink-0">
               <ArrowUpRight size={18} strokeWidth={2} />
             </div>
           </div>
-          <div className="flex items-center justify-between pt-5 border-t border-[var(--line)]">
-            <span className="caption">카메라 · 갤러리에서 불러오기</span>
+          <div className="flex items-center justify-between pt-4 border-t border-[var(--line)]">
+            <span className="caption">카메라 · 갤러리</span>
             <span className="mono text-[11px] text-[var(--muted)]">01 / 04</span>
           </div>
         </div>
       </Link>
 
       {/* Footer */}
-      <footer className="mt-auto py-8 flex items-center justify-between rise rise-4">
-        <span className="text-[12px] text-[var(--muted)]">화담 디자인</span>
-        <span className="mono text-[11px] text-[var(--muted)]">
-          © 2026
-        </span>
+      <footer className="pt-4 pb-3 flex items-center justify-between rise rise-4">
+        <span className="text-[11px] text-[var(--muted)]">화담 디자인</span>
+        <span className="mono text-[11px] text-[var(--muted)]">© 2026</span>
       </footer>
     </main>
   );

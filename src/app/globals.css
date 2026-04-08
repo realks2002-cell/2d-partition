@@ -541,8 +541,8 @@ body {
 .section-head {
   display: flex;
   align-items: baseline;
-  gap: 12px;
-  margin-bottom: 14px;
+  gap: 10px;
+  margin-bottom: 10px;
 }
 .section-head .idx {
   font-family: var(--font-mono);

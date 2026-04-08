@@ -55,13 +55,29 @@ export function checkRateLimit(req: NextRequest): NextResponse | null {
 export function checkAuth(req: NextRequest): NextResponse | null {
   const expected = process.env.APP_API_TOKEN;
   if (!expected) {
-    // No token configured → open access (dev mode)
     return null;
   }
   const auth = req.headers.get("authorization") ?? "";
   const token = auth.startsWith("Bearer ") ? auth.slice(7) : "";
   if (token !== expected) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    console.log("[auth] fail", {
+      hasHeader: !!auth,
+      headerPrefix: auth.slice(0, 16),
+      tokenLen: token.length,
+      expectedLen: expected.length,
+      match: token === expected,
+    });
+    return NextResponse.json(
+      {
+        error: "Unauthorized",
+        debug: {
+          hasHeader: !!auth,
+          tokenLen: token.length,
+          expectedLen: expected.length,
+        },
+      },
+      { status: 401 },
+    );
   }
   return null;
 }

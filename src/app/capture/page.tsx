@@ -32,9 +32,9 @@ function CaptureInner() {
   };
 
   return (
-    <main className="min-h-screen max-w-md mx-auto px-6 pt-safe pb-40">
+    <main className="h-[100dvh] max-w-md mx-auto px-6 pt-safe flex flex-col">
       {/* Top bar */}
-      <div className="flex items-center justify-between pt-5 pb-4 rise">
+      <div className="flex items-center justify-between pt-4 pb-3 rise">
         <Link href="/" className="btn-icon" aria-label="뒤로">
           <ArrowLeft size={18} />
         </Link>
@@ -42,13 +42,11 @@ function CaptureInner() {
         <div className="w-[44px]" />
       </div>
 
-      <header className="mb-8 rise rise-1">
-        <div className="eyebrow mb-3">Capture</div>
-        <h1 className="display-tight text-[22px] mb-2">
-          현장 사진
-        </h1>
-        <p className="caption max-w-[320px]">
-          칸막이가 설치될 벽을 정면에서 촬영하세요. 수평·수직이 맞으면 렌더링 정확도가 높아집니다.
+      <header className="mb-4 rise rise-1">
+        <div className="eyebrow mb-2">Capture</div>
+        <h1 className="display-tight text-[22px] mb-1.5">현장 사진</h1>
+        <p className="text-[12px] text-[var(--muted)] leading-[1.5]">
+          벽을 정면에서 촬영하세요.
         </p>
       </header>
 
@@ -62,48 +60,41 @@ function CaptureInner() {
       />
 
       {!preview ? (
-        <div className="rise rise-2">
+        <div className="flex-1 min-h-0 flex flex-col rise rise-2">
           <button
             onClick={() => fileRef.current?.click()}
             disabled={busy}
-            className="relative w-full aspect-[4/5] rounded-[var(--radius-xl)] bg-[var(--surface)] border border-[var(--line)] overflow-hidden flex flex-col items-center justify-center gap-6 transition-transform active:scale-[0.99]"
+            className="relative flex-1 min-h-0 rounded-[var(--radius-xl)] bg-[var(--surface)] border border-[var(--line)] overflow-hidden flex flex-col items-center justify-center gap-4 transition-transform active:scale-[0.99]"
             style={{ boxShadow: "var(--shadow-2)" }}
           >
-            <div className="w-20 h-20 rounded-full bg-[var(--ink)] text-[var(--surface)] flex items-center justify-center">
-              <Camera size={32} strokeWidth={1.6} />
+            <div className="w-16 h-16 rounded-full bg-[var(--ink)] text-[var(--surface)] flex items-center justify-center">
+              <Camera size={26} strokeWidth={1.6} />
             </div>
             <div className="text-center">
-              <div className="display text-[24px] leading-none mb-2">
+              <div className="display text-[20px] leading-none mb-1.5">
                 촬영 또는 선택
               </div>
               <div className="caption">Tap to open camera</div>
             </div>
-            <div className="absolute bottom-5 left-5 right-5 flex items-center justify-between">
-              <span className="eyebrow">Portrait · 4:5</span>
+            <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
+              <span className="eyebrow">JPEG · PNG</span>
               <ImageIcon size={14} className="text-[var(--muted)]" />
             </div>
           </button>
-          <p className="mt-4 caption text-center">
-            JPEG · PNG / 최대 20MB · 자동 리사이즈됩니다
-          </p>
+          <div className="pb-4" />
         </div>
       ) : (
-        <div className="space-y-4 rise">
-          <div className="surface-raised overflow-hidden">
-            <img src={preview} alt="" className="w-full block" />
+        <div className="flex-1 min-h-0 flex flex-col rise">
+          <div className="surface-raised overflow-hidden flex-1 min-h-0">
+            <img src={preview} alt="" className="w-full h-full object-contain" />
           </div>
-          <div className="flex items-center justify-between px-1">
+          <div className="flex items-center justify-between px-1 pt-2 pb-3">
             <span className="eyebrow">Source Saved</span>
             <span className="mono text-[11px] text-[var(--muted)]">
               ready for spec
             </span>
           </div>
-        </div>
-      )}
-
-      {preview && (
-        <div className="action-bar">
-          <div className="inner flex gap-3">
+          <div className="flex gap-3 pb-4">
             <button
               onClick={() => {
                 setPreview(null);
@@ -118,7 +109,7 @@ function CaptureInner() {
               onClick={() => router.push("/spec")}
               className="btn btn-primary flex-[1.4]"
             >
-              다음 단계
+              다음
               <ArrowRight size={18} />
             </button>
           </div>

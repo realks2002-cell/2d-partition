@@ -162,9 +162,9 @@ export default function SpecPage() {
   };
 
   return (
-    <main className="min-h-screen max-w-md mx-auto px-6 pt-safe pb-40">
+    <main className="min-h-[100dvh] max-w-md mx-auto px-5 pt-safe pb-32">
       {/* Top bar */}
-      <div className="flex items-center justify-between pt-5 pb-4">
+      <div className="flex items-center justify-between pt-3 pb-2">
         <Link href="/capture?kind=photo" className="btn-icon" aria-label="뒤로">
           <ArrowLeft size={18} />
         </Link>
@@ -176,8 +176,8 @@ export default function SpecPage() {
         )}
       </div>
 
-      <header className="mb-7">
-        <div className="eyebrow mb-3">Specification</div>
+      <header className="mb-4">
+        <div className="eyebrow mb-1.5">Specification</div>
         <h1 className="display-tight text-[22px]">스펙 설정</h1>
       </header>
 
@@ -259,7 +259,7 @@ export default function SpecPage() {
 
       {/* 03 — Panel composition */}
       <Section idx="03" title="칸 구성">
-        <div className="mb-5">
+        <div className="mb-3">
           <div className="field-label">
             <span>패널 1칸 기본 폭</span>
             <span className="unit">mm</span>
@@ -280,7 +280,7 @@ export default function SpecPage() {
           </div>
         </div>
 
-        <div className="mb-5">
+        <div className="mb-3">
           <div className="field-label">
             <span>칸 수</span>
             <span className="unit">panels</span>
@@ -447,7 +447,7 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="mb-8">
+    <section className="mb-5">
       <div className="section-head">
         <span className="idx">{idx}</span>
         <span className="title">{title}</span>
