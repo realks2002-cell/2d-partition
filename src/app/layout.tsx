@@ -1,19 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
-
-const fraunces = Fraunces({
-  variable: "--font-display",
-  subsets: ["latin"],
-  axes: ["SOFT", "WONK", "opsz"],
-  display: "swap",
-});
-
-const mono = JetBrains_Mono({
-  variable: "--font-mono",
-  subsets: ["latin"],
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: "화담 칸막이 시뮬레이터",
@@ -40,10 +26,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="ko"
-      className={`${fraunces.variable} ${mono.variable} h-full antialiased`}
-    >
+    <html lang="ko" className="h-full antialiased">
       <head>
         <link
           rel="stylesheet"

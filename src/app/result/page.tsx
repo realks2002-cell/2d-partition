@@ -6,22 +6,24 @@ import Link from "next/link";
 import { useSession } from "@/lib/store";
 import { useHydrateImages } from "@/lib/use-hydrate-images";
 import { apiUrl, authHeaders } from "@/lib/api-client";
-import { ArrowRight, ArrowLeft, Loader2, RotateCw, Check } from "lucide-react";
+import { burnPlacementOntoImage } from "@/lib/image";
+import { ArrowRight, ArrowLeft, Loader2, RotateCw, RefreshCw, Check, Home } from "lucide-react";
 
 export default function ResultPage() {
   useHydrateImages();
   const router = useRouter();
   const {
     sourceImage,
+    sourceMimeType,
+    drawingImage,
+    drawingMimeType,
+    placement,
     spec,
     renderings,
     selectedRendering,
     selectRendering,
     setRenderings,
-    dimension,
-    currentSegment,
-    saveCurrentAsSegment,
-    setCurrentSegment,
+    reset,
   } = useSession();
   const [instruction, setInstruction] = useState("");
   const [busy, setBusy] = useState(false);
@@ -38,6 +40,47 @@ export default function ResultPage() {
     );
   }
 
+  const rerender = async () => {
+    if (!sourceImage) return;
+    setBusy(true);
+    setError(null);
+    try {
+      let imageBase64: string;
+      let imageMimeType: string;
+      if (placement) {
+        const burned = await burnPlacementOntoImage(sourceImage, spec, placement);
+        imageBase64 = burned.base64;
+        imageMimeType = burned.mimeType;
+      } else {
+        const [, b64] = sourceImage.split(",");
+        imageBase64 = b64;
+        imageMimeType = sourceMimeType ?? "image/jpeg";
+      }
+      const drawingB64 = drawingImage?.split(",")[1];
+      const res = await fetch(apiUrl("/api/render"), {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify({
+          mode: "C",
+          spec,
+          placement,
+          imageBase64,
+          imageMimeType,
+          drawingBase64: drawingB64,
+          drawingMimeType: drawingB64 ? drawingMimeType : undefined,
+          count: 1,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "렌더링 실패");
+      setRenderings(json.images);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const refine = async () => {
     if (!selectedRendering || !instruction.trim()) return;
     setBusy(true);
@@ -49,7 +92,7 @@ export default function ResultPage() {
         headers: authHeaders(),
         body: JSON.stringify({
           mode: "C",
-          spec: { ...spec, notes: instruction },
+          spec,
           imageBase64: b64,
           imageMimeType: "image/png",
           editInstruction: instruction,
@@ -67,24 +110,12 @@ export default function ResultPage() {
     }
   };
 
-  const ctaLabel =
-    dimension === 2 && currentSegment === 1
-      ? "다음 세그먼트"
-      : dimension === 2
-        ? "모두 완료"
-        : "확정 · 공유";
+  const onNext = () => router.push("/share");
 
-  const onNext = () => {
-    if (dimension === 2 && currentSegment === 1) {
-      saveCurrentAsSegment();
-      setCurrentSegment(2);
-      router.push("/capture?kind=photo");
-    } else if (dimension === 2 && currentSegment === 2) {
-      saveCurrentAsSegment();
-      router.push("/share");
-    } else {
-      router.push("/share");
-    }
+  const restart = () => {
+    if (!confirm("처음부터 다시 시작하시겠습니까? 현재 렌더링 결과는 사라집니다.")) return;
+    reset();
+    router.push("/");
   };
 
   return (
@@ -94,7 +125,9 @@ export default function ResultPage() {
           <ArrowLeft size={18} />
         </Link>
         <div className="mono text-[11px] text-[var(--muted)]">03 / 04</div>
-        <div className="w-[44px]" />
+        <button onClick={restart} className="btn-icon" aria-label="처음부터 다시">
+          <Home size={18} />
+        </button>
       </div>
 
       <header className="mb-7">
@@ -174,7 +207,7 @@ export default function ResultPage() {
               onClick={refine}
               disabled={busy || !instruction.trim()}
               className="btn btn-secondary shrink-0 !min-h-[52px] !px-4"
-              aria-label="재생성"
+              aria-label="수정 재생성"
             >
               {busy ? (
                 <Loader2 className="animate-spin" size={18} />
@@ -183,14 +216,30 @@ export default function ResultPage() {
               )}
             </button>
           </div>
-          <button
-            onClick={onNext}
-            disabled={!selectedRendering}
-            className="btn btn-primary w-full"
-          >
-            {ctaLabel}
-            <ArrowRight size={18} />
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={rerender}
+              disabled={busy || !sourceImage}
+              className="btn btn-secondary flex-1"
+            >
+              {busy ? (
+                <Loader2 className="animate-spin" size={18} />
+              ) : (
+                <>
+                  <RefreshCw size={18} />
+                  렌더링 다시
+                </>
+              )}
+            </button>
+            <button
+              onClick={onNext}
+              disabled={busy || !selectedRendering}
+              className="btn btn-primary flex-1"
+            >
+              확정 · 공유
+              <ArrowRight size={18} />
+            </button>
+          </div>
         </div>
       </div>
     </main>

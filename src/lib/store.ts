@@ -2,7 +2,11 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { PartitionSpec, PartitionPlacement } from "./prompt-builder";
+import type {
+  PartitionSpec,
+  PartitionPlacement,
+  WallSpec,
+} from "./prompt-builder";
 import {
   saveSourceImage,
   saveRenderings,
@@ -22,15 +26,6 @@ export interface DimensionAnnotation {
   mm: number;
 }
 
-export interface CompletedSegment {
-  sourceImage: string;
-  sourceMimeType: string;
-  renderings: string[];
-  selectedRendering: string | null;
-  spec: PartitionSpec;
-  placement: PartitionPlacement | null;
-}
-
 export interface SessionState {
   sourceImage: string | null;
   sourceMimeType: string | null;
@@ -47,8 +42,6 @@ export interface SessionState {
   selectedRendering: string | null;
 
   dimension: 1 | 2;
-  currentSegment: 1 | 2;
-  completedSegments: CompletedSegment[];
 
   setSource: (img: string, mime: string, kind: SourceKind) => void;
   setDrawing: (img: string | null, mime: string | null) => void;
@@ -57,24 +50,31 @@ export interface SessionState {
   removeAnnotation: (id: string) => void;
   setPlacement: (p: PartitionPlacement | null) => void;
   setSpec: (spec: Partial<PartitionSpec>) => void;
+  setWallB: (wall: Partial<WallSpec>) => void;
   setRenderings: (imgs: string[]) => void;
   selectRendering: (img: string) => void;
   setDimension: (d: 1 | 2) => void;
-  saveCurrentAsSegment: () => void;
-  setCurrentSegment: (n: 1 | 2) => void;
   reset: () => void;
   hydrateImages: () => Promise<void>;
 }
 
-const DEFAULT_SPEC: PartitionSpec = {
+const DEFAULT_WALL_B: WallSpec = {
   siteWidthMm: 4000,
+  panelWidthMm: 800,
+  panelCount: 5,
+  doorPanelIndex: 0,
+  startSide: "left",
+};
+
+const DEFAULT_SPEC: PartitionSpec = {
   siteHeightMm: 2700,
-  panelWidthMm: 1000,
-  panelCount: 4,
   heightMm: 2400,
   depthMm: 80,
   frameColor: "black",
   frameTier: 1,
+  siteWidthMm: 4000,
+  panelWidthMm: 800,
+  panelCount: 5,
   doorPanelIndex: 2,
   startSide: "right",
   notes: "",
@@ -95,39 +95,16 @@ export const useSession = create<SessionState>()(
       renderings: [],
       selectedRendering: null,
       dimension: 1,
-      currentSegment: 1,
-      completedSegments: [],
 
       setDimension: (d) =>
-        set({
+        set((s) => ({
           dimension: d,
-          currentSegment: 1,
-          completedSegments: [],
-        }),
-      setCurrentSegment: (n) => set({ currentSegment: n }),
-      saveCurrentAsSegment: () =>
-        set((s) => {
-          if (!s.sourceImage || !s.sourceMimeType) return s;
-          const segment: CompletedSegment = {
-            sourceImage: s.sourceImage,
-            sourceMimeType: s.sourceMimeType,
-            renderings: s.renderings,
-            selectedRendering: s.selectedRendering,
-            spec: s.spec,
-            placement: s.placement,
-          };
-          return {
-            completedSegments: [...s.completedSegments, segment],
-            sourceImage: null,
-            sourceMimeType: null,
-            sourceKind: null,
-            placement: null,
-            scale: null,
-            annotations: [],
-            renderings: [],
-            selectedRendering: null,
-          };
-        }),
+          spec:
+            d === 2
+              ? { ...s.spec, wallB: s.spec.wallB ?? { ...DEFAULT_WALL_B } }
+              : { ...s.spec, wallB: undefined },
+          placement: null,
+        })),
 
       setSource: (img, mime, kind) => {
         set({
@@ -154,6 +131,13 @@ export const useSession = create<SessionState>()(
         set((s) => ({ annotations: s.annotations.filter((a) => a.id !== id) })),
       setPlacement: (p) => set({ placement: p }),
       setSpec: (spec) => set((s) => ({ spec: { ...s.spec, ...spec } })),
+      setWallB: (wall) =>
+        set((s) => ({
+          spec: {
+            ...s.spec,
+            wallB: { ...(s.spec.wallB ?? DEFAULT_WALL_B), ...wall },
+          },
+        })),
       setRenderings: (imgs) => {
         set({ renderings: imgs, selectedRendering: imgs[0] ?? null });
         const wrapped = imgs.map((dataUrl) => ({
@@ -184,8 +168,6 @@ export const useSession = create<SessionState>()(
           renderings: [],
           selectedRendering: null,
           dimension: 1,
-          currentSegment: 1,
-          completedSegments: [],
         });
         void clearImageStore();
       },
@@ -206,25 +188,41 @@ export const useSession = create<SessionState>()(
     }),
     {
       name: "hwadam-session",
-      version: 4,
+      version: 7,
       migrate: (persistedState: unknown, version: number) => {
-        const state = (persistedState ?? {}) as Partial<SessionState>;
+        const state = (persistedState ?? {}) as Record<string, unknown>;
         if (version < 2) {
           return { ...state, spec: DEFAULT_SPEC, placement: null };
         }
         if (version < 3) {
-          return {
-            ...state,
-            dimension: 1 as const,
-            currentSegment: 1 as const,
-            completedSegments: [],
-          };
+          return { ...state, dimension: 1 };
         }
         if (version < 4) {
+          const prevSpec = (state.spec as Partial<PartitionSpec>) ?? {};
           return {
             ...state,
-            spec: { ...DEFAULT_SPEC, ...(state.spec ?? {}), startSide: "right" as const },
+            spec: { ...DEFAULT_SPEC, ...prevSpec, startSide: "right" },
           };
+        }
+        if (version < 5) {
+          // v4 → v5: remove currentSegment/completedSegments, ensure wallB default
+          const { currentSegment, completedSegments, ...rest } = state;
+          void currentSegment;
+          void completedSegments;
+          const prevSpec = (rest.spec as Partial<PartitionSpec>) ?? {};
+          return {
+            ...rest,
+            spec: { ...DEFAULT_SPEC, ...prevSpec, wallB: undefined },
+            dimension: 1,
+          };
+        }
+        if (version < 6) {
+          // v5 → v6: reset panelCount default to 5 (was 4)
+          return { ...state, spec: DEFAULT_SPEC };
+        }
+        if (version < 7) {
+          // v6 → v7: force reset spec to new defaults (panelCount 5, panelWidth 800)
+          return { ...state, spec: DEFAULT_SPEC, placement: null };
         }
         return state;
       },
@@ -234,7 +232,6 @@ export const useSession = create<SessionState>()(
         annotations: s.annotations,
         placement: s.placement,
         dimension: s.dimension,
-        currentSegment: s.currentSegment,
       }),
     },
   ),

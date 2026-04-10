@@ -61,9 +61,9 @@
   --color-muted: var(--muted);
   --color-accent: var(--accent);
   --color-line: var(--line);
-  --font-display: var(--font-display);
+  --font-display: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
   --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
-  --font-mono: var(--font-mono);
+  --font-mono: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
 }
 
 * {
@@ -100,32 +100,30 @@ body {
 /* ======== Typography ======== */
 
 .display {
-  font-family: var(--font-display), Georgia, serif;
-  font-variation-settings: "opsz" 144, "SOFT" 0, "WONK" 0;
+  font-family: var(--font-display);
   letter-spacing: -0.025em;
-  line-height: 0.96;
-  font-weight: 400;
+  line-height: 1.1;
+  font-weight: 700;
   color: var(--ink);
 }
 
 .display-tight {
-  font-family: var(--font-display), Georgia, serif;
-  font-variation-settings: "opsz" 144;
-  letter-spacing: -0.035em;
-  line-height: 0.92;
-  font-weight: 500;
+  font-family: var(--font-display);
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  font-weight: 700;
 }
 
 .serif {
-  font-family: var(--font-display), Georgia, serif;
-  font-variation-settings: "opsz" 14;
-  font-weight: 400;
+  font-family: var(--font-display);
+  font-weight: 600;
 }
 
 .mono,
 .numeric {
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-feature-settings: "tnum", "zero";
+  font-family: var(--font-mono);
+  font-feature-settings: "tnum";
+  font-variant-numeric: tabular-nums;
 }
 
 .eyebrow {
@@ -436,6 +434,29 @@ body {
   font-feature-settings: "tnum";
   color: var(--ink);
 }
+.counter > .counter-input {
+  width: 56px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 500;
+  font-feature-settings: "tnum";
+  color: var(--ink);
+  background: transparent;
+  border: 0;
+  outline: 0;
+  padding: 0;
+  -moz-appearance: textfield;
+}
+.counter > .counter-input::-webkit-outer-spin-button,
+.counter > .counter-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.counter > .counter-input:focus {
+  background: var(--surface-2);
+  border-radius: 4px;
+}
 
 /* ======== Swatch ======== */
 
@@ -509,15 +530,9 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  padding: 16px 20px calc(16px + env(safe-area-inset-bottom));
-  background: linear-gradient(
-    180deg,
-    rgba(250, 250, 247, 0) 0%,
-    rgba(250, 250, 247, 0.9) 25%,
-    var(--bg) 55%
-  );
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  padding: 12px 20px calc(12px + env(safe-area-inset-bottom));
+  background: var(--bg);
+  border-top: 1px solid var(--line);
   z-index: 50;
 }
 .action-bar > .inner {
@@ -621,4 +636,124 @@ select:focus-visible,
 a:focus-visible {
   outline: 2px solid var(--ink);
   outline-offset: 2px;
+}
+
+/* ======== Spec page compact overrides ========
+   - Buttons: 30% smaller (70% of original)
+   - Inputs: 20% smaller (80% of original)
+*/
+
+.spec-compact .btn {
+  min-height: 34px;
+  padding: 0 14px;
+  font-size: 13px;
+  gap: 7px;
+  border-radius: 10px;
+}
+.spec-compact .btn-primary {
+  min-height: 34px;
+}
+.spec-compact .btn-secondary {
+  min-height: 34px;
+}
+.spec-compact .btn-icon {
+  width: 31px;
+  height: 31px;
+}
+.spec-compact .btn-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.spec-compact .seg {
+  padding: 3px;
+  border-radius: 10px;
+}
+.spec-compact .seg > button {
+  min-height: 28px;
+  font-size: 11px;
+  border-radius: 7px;
+}
+
+.spec-compact .counter {
+  padding: 3px;
+  border-radius: 10px;
+}
+.spec-compact .counter > button {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+}
+.spec-compact .counter > button svg {
+  width: 13px;
+  height: 13px;
+}
+.spec-compact .counter > .value {
+  min-width: 40px;
+  font-size: 14px;
+}
+.spec-compact .counter > .counter-input {
+  width: 40px;
+  font-size: 14px;
+}
+
+.spec-compact .pill-num {
+  min-width: 30px;
+  height: 30px;
+  padding: 0 7px;
+  font-size: 11px;
+  border-radius: 10px;
+}
+
+.spec-compact .swatch {
+  padding: 7px 4px;
+  border-radius: 10px;
+}
+.spec-compact .swatch .dot {
+  width: 18px;
+  height: 18px;
+}
+.spec-compact .swatch .name {
+  font-size: 10px;
+}
+
+.spec-compact .chip-soft {
+  padding: 4px 9px;
+  font-size: 10px;
+}
+
+/* Inputs 20% smaller */
+.spec-compact .num-input {
+  min-height: 34px;
+  padding: 8px 10px;
+  font-size: 12px;
+  border-radius: 6px;
+}
+.spec-compact .text-input {
+  min-height: 34px;
+  padding: 8px 10px;
+  font-size: 11px;
+  border-radius: 6px;
+}
+.spec-compact .field-label {
+  font-size: 11px;
+  margin-bottom: 6px;
+}
+.spec-compact .field-label .unit {
+  font-size: 9px;
+}
+.spec-compact .section-head .title {
+  font-size: 13px;
+}
+.spec-compact .section-head .idx {
+  font-size: 10px;
+}
+.spec-compact .section-head .tag {
+  font-size: 10px;
+}
+
+/* Action bar (fixed bottom) primary button — keep compact too */
+.spec-compact .action-bar .btn-primary {
+  min-height: 40px;
+  font-size: 13px;
 }

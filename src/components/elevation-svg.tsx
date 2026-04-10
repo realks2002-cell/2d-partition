@@ -1,9 +1,11 @@
 "use client";
 
-import { totalWidthMm, type PartitionSpec } from "@/lib/prompt-builder";
+import type { PartitionSpec, WallSpec } from "@/lib/prompt-builder";
 
 interface Props {
   spec: PartitionSpec;
+  /** If provided, renders this wall instead of spec's wall A (used for wall B in 2D mode) */
+  wallOverride?: WallSpec;
   width?: number;
 }
 
@@ -13,8 +15,12 @@ const FRAME_FILL: Record<PartitionSpec["frameColor"], string> = {
   "dark-gray": "#3a3a3a",
 };
 
-export function ElevationSvg({ spec, width = 480 }: Props) {
-  const widthMm = totalWidthMm(spec);
+export function ElevationSvg({ spec, wallOverride, width = 480 }: Props) {
+  const panelCount = wallOverride?.panelCount ?? spec.panelCount;
+  const panelWidthMm = wallOverride?.panelWidthMm ?? spec.panelWidthMm;
+  const doorPanelIndex = wallOverride?.doorPanelIndex ?? spec.doorPanelIndex;
+
+  const widthMm = panelCount * panelWidthMm;
   const ratio = spec.heightMm / widthMm;
   const margin = 60;
   const drawW = width - margin * 2;
@@ -29,10 +35,10 @@ export function ElevationSvg({ spec, width = 480 }: Props) {
   const fill = "rgba(180,210,230,0.35)";
   const stroke = FRAME_FILL[spec.frameColor];
 
-  const panelDrawW = drawW / spec.panelCount;
-  const tierY = spec.frameTier === 2 ? y0 + drawH * (1 / 3) : null;
+  const panelDrawW = drawW / panelCount;
+  const tierY = spec.frameTier === 2 ? y0 + drawH * 0.2 : null;
 
-  const doorIdx = Math.max(1, Math.min(spec.panelCount, spec.doorPanelIndex));
+  const doorIdx = Math.max(1, Math.min(panelCount, doorPanelIndex));
   const doorX = x0 + panelDrawW * (doorIdx - 1);
   const doorPanelW = panelDrawW;
   const arcRadius = Math.min(doorPanelW * 0.9, drawH - 20);
@@ -55,7 +61,7 @@ export function ElevationSvg({ spec, width = 480 }: Props) {
       />
 
       {/* panel dividers (vertical mullions) */}
-      {Array.from({ length: spec.panelCount - 1 }).map((_, i) => {
+      {Array.from({ length: panelCount - 1 }).map((_, i) => {
         const x = x0 + panelDrawW * (i + 1);
         return (
           <line
@@ -83,7 +89,7 @@ export function ElevationSvg({ spec, width = 480 }: Props) {
       )}
 
       {/* door (only when doorPanelIndex > 0) */}
-      {spec.doorPanelIndex > 0 && (
+      {doorPanelIndex > 0 && (
         <>
           <rect
             x={doorX + 4}
@@ -124,7 +130,7 @@ export function ElevationSvg({ spec, width = 480 }: Props) {
         fontSize={13}
         fill="#222"
       >
-        W {widthMm} mm ({spec.panelCount}칸 × {spec.panelWidthMm}mm)
+        W {widthMm} mm ({panelCount}칸 × {panelWidthMm}mm)
       </text>
 
       {/* height dimension (left) */}
@@ -148,7 +154,7 @@ export function ElevationSvg({ spec, width = 480 }: Props) {
       <text x={x0} y={y0 - 15} fontSize={11} fill="#666">
         glass + steel · frame: {spec.frameColor} ·{" "}
         {spec.frameTier === 1 ? "1단" : "2단"} ·{" "}
-        {spec.doorPanelIndex > 0 ? `door @ panel #${doorIdx}` : "no door"}
+        {doorPanelIndex > 0 ? `door @ panel #${doorIdx}` : "no door"}
       </text>
     </svg>
   );

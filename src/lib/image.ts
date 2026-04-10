@@ -1,3 +1,13 @@
+import type {
+  PartitionSpec,
+  PartitionPlacement,
+  WallPlacement,
+  WallSpec,
+  FrameColor,
+  FrameTier,
+  StartSide,
+} from "./prompt-builder";
+
 export interface ResizedImage {
   dataUrl: string;
   base64: string;
@@ -67,36 +77,56 @@ export async function generatePlacementMask(
   return { dataUrl, blob };
 }
 
-export async function burnPlacementOntoImage(
-  sourceDataUrl: string,
-  placement: PlacementLine,
-  heightMm: number,
-  siteHeightMm: number,
-  panelCount: number = 0,
-  doorPanelIndex: number = 0,
-  frameTier: 1 | 2 = 1,
-  siteWidthMm: number = 0,
-  partitionWidthMm: number = 0,
-  startSide: "left" | "right" | "center" = "right",
-  frameColor: "black" | "white" | "dark-gray" = "black",
-): Promise<{ dataUrl: string; base64: string; mimeType: string }> {
-  const img = await new Promise<HTMLImageElement>((resolve, reject) => {
-    const i = new Image();
-    i.onload = () => resolve(i);
-    i.onerror = reject;
-    i.src = sourceDataUrl;
-  });
-  const canvas = document.createElement("canvas");
-  const w = img.naturalWidth;
-  const h = img.naturalHeight;
-  canvas.width = w;
-  canvas.height = h;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("Canvas 2D context not available");
-  ctx.drawImage(img, 0, 0);
+const FRAME_HEX: Record<FrameColor, string> = {
+  black: "#111111",
+  white: "#f5f5f5",
+  "dark-gray": "#3a3a3a",
+};
 
-  // === Compute 4 corners of partition (bl, br, tr, tl) ===
-  type Pt = { x: number; y: number };
+type Pt = { x: number; y: number };
+
+interface WallOverlayOptions {
+  label: "A" | "B";
+  outlineColor: string; // magenta or cyan
+  fillColor: string;
+  placement: WallPlacement;
+  panelCount: number;
+  doorPanelIndex: number;
+  frameTier: FrameTier;
+  frameColor: FrameColor;
+  siteWidthMm: number;
+  siteHeightMm: number;
+  partitionWidthMm: number;
+  heightMm: number;
+  startSide: StartSide;
+  /** Skip the startSide corridor shift (used when drawing wall B which shares edge with A). */
+  skipCorridorShift?: boolean;
+}
+
+function drawWallOverlay(
+  ctx: CanvasRenderingContext2D,
+  w: number,
+  h: number,
+  strokeW: number,
+  opts: WallOverlayOptions,
+) {
+  const {
+    label,
+    outlineColor,
+    fillColor,
+    placement,
+    panelCount,
+    doorPanelIndex,
+    frameTier,
+    frameColor,
+    siteWidthMm,
+    siteHeightMm,
+    partitionWidthMm,
+    heightMm,
+    startSide,
+    skipCorridorShift,
+  } = opts;
+
   const bottomA: Pt = { x: placement.x1 * w, y: placement.y1 * h };
   const bottomB: Pt = { x: placement.x2 * w, y: placement.y2 * h };
   let bl: Pt = bottomA.x <= bottomB.x ? bottomA : bottomB;
@@ -122,7 +152,6 @@ export async function burnPlacementOntoImage(
     tl = topA.x <= topB.x ? topA : topB;
     tr = topA.x <= topB.x ? topB : topA;
   } else {
-    // fallback: auto-compute top by heightRatio (axis-aligned rectangle)
     const baseY = Math.max(bl.y, br.y);
     const heightRatio = siteHeightMm > 0 ? heightMm / siteHeightMm : 0.85;
     const rectH = Math.min(baseY, heightRatio * h);
@@ -131,9 +160,9 @@ export async function burnPlacementOntoImage(
     tr = { x: br.x, y: topY };
   }
 
-  // Apply startSide for partial wall (only when no explicit top line)
   if (
     !hasTop &&
+    !skipCorridorShift &&
     siteWidthMm > 0 &&
     partitionWidthMm > 0 &&
     partitionWidthMm < siteWidthMm
@@ -154,7 +183,6 @@ export async function burnPlacementOntoImage(
       newLx = center - partitionPixelW / 2;
       newRx = center + partitionPixelW / 2;
     }
-    // interpolate Y of the bottom line at new x
     const interpY = (xx: number) => {
       const t = (xx - bl.x) / (lineW || 1);
       return bl.y + t * (br.y - bl.y);
@@ -165,7 +193,6 @@ export async function burnPlacementOntoImage(
     tr = { x: newRx, y: tr.y };
   }
 
-  // bilinear interpolation helper: u∈[0,1] left→right, v∈[0,1] bottom→top
   const quadPt = (u: number, v: number): Pt => ({
     x:
       (1 - u) * (1 - v) * bl.x +
@@ -188,12 +215,8 @@ export async function burnPlacementOntoImage(
     ctx.closePath();
   };
 
-  const strokeW = Math.max(6, Math.round(w * 0.008));
-  const MAGENTA = "#ff00c8";
-  const FILL = "rgba(255, 0, 200, 0.55)";
-
-  // 1) semi-transparent magenta fill (polygon)
-  ctx.fillStyle = FILL;
+  // 1) semi-transparent fill
+  ctx.fillStyle = fillColor;
   tracePolygon();
   ctx.fill();
 
@@ -206,26 +229,18 @@ export async function burnPlacementOntoImage(
   tracePolygon();
   ctx.stroke();
 
-  // 3) thick dashed magenta border
-  ctx.strokeStyle = MAGENTA;
+  // 3) thick dashed outline
+  ctx.strokeStyle = outlineColor;
   ctx.lineWidth = strokeW;
   ctx.setLineDash([20, 12]);
   tracePolygon();
   ctx.stroke();
   ctx.setLineDash([]);
 
-  // 5) internal structure — drawn in the target frame color
-  // so that even if the AI preserves these strokes, they become
-  // correct mullions in the output.
-  const FRAME_HEX: Record<string, string> = {
-    black: "#111111",
-    white: "#f5f5f5",
-    "dark-gray": "#3a3a3a",
-  };
   const LIME = FRAME_HEX[frameColor];
   ctx.lineCap = "butt";
 
-  // vertical panel dividers (interpolated along top/bottom edges)
+  // vertical panel dividers
   if (panelCount > 1) {
     ctx.strokeStyle = LIME;
     ctx.lineWidth = Math.max(4, Math.round(strokeW * 0.8));
@@ -240,7 +255,7 @@ export async function burnPlacementOntoImage(
     }
   }
 
-  // 2-tier horizontal mullion at 20% from top (v = 0.8)
+  // 2-tier horizontal mullion
   if (frameTier === 2) {
     const pL = quadPt(0, 0.8);
     const pR = quadPt(1, 0.8);
@@ -252,7 +267,7 @@ export async function burnPlacementOntoImage(
     ctx.stroke();
   }
 
-  // 6) door cell — frame-colored outline only (no fill) to avoid color bleed
+  // door cell outline
   if (
     panelCount >= 1 &&
     doorPanelIndex >= 1 &&
@@ -264,7 +279,7 @@ export async function burnPlacementOntoImage(
     const dbr = quadPt(uR, 0);
     const dtr = quadPt(uR, 1);
     const dtl = quadPt(uL, 1);
-    ctx.strokeStyle = LIME; // frame color (from above)
+    ctx.strokeStyle = LIME;
     ctx.lineWidth = Math.max(5, Math.round(strokeW * 1.2));
     ctx.beginPath();
     ctx.moveTo(dbl.x, dbl.y);
@@ -273,6 +288,82 @@ export async function burnPlacementOntoImage(
     ctx.lineTo(dtl.x, dtl.y);
     ctx.closePath();
     ctx.stroke();
+  }
+
+  // No text label — color difference alone distinguishes A (magenta) vs B (cyan).
+  // Text labels tend to get preserved by the AI as actual image content.
+  void label;
+}
+
+function wallTotalWidth(wall: WallSpec): number {
+  return wall.panelCount * wall.panelWidthMm;
+}
+
+export async function burnPlacementOntoImage(
+  sourceDataUrl: string,
+  spec: PartitionSpec,
+  placement: PartitionPlacement,
+): Promise<{ dataUrl: string; base64: string; mimeType: string }> {
+  const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+    const i = new Image();
+    i.onload = () => resolve(i);
+    i.onerror = reject;
+    i.src = sourceDataUrl;
+  });
+  const canvas = document.createElement("canvas");
+  const w = img.naturalWidth;
+  const h = img.naturalHeight;
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Canvas 2D context not available");
+  ctx.drawImage(img, 0, 0);
+
+  const strokeW = Math.max(6, Math.round(w * 0.008));
+
+  // Wall A overlay (magenta)
+  drawWallOverlay(ctx, w, h, strokeW, {
+    label: "A",
+    outlineColor: "#ff00c8",
+    fillColor: "rgba(255, 0, 200, 0.55)",
+    placement: {
+      x1: placement.x1,
+      y1: placement.y1,
+      x2: placement.x2,
+      y2: placement.y2,
+      topX1: placement.topX1,
+      topY1: placement.topY1,
+      topX2: placement.topX2,
+      topY2: placement.topY2,
+    },
+    panelCount: spec.panelCount,
+    doorPanelIndex: spec.doorPanelIndex,
+    frameTier: spec.frameTier,
+    frameColor: spec.frameColor,
+    siteWidthMm: spec.siteWidthMm,
+    siteHeightMm: spec.siteHeightMm,
+    partitionWidthMm: spec.panelCount * spec.panelWidthMm,
+    heightMm: spec.heightMm,
+    startSide: spec.startSide,
+  });
+
+  // Wall B overlay (cyan) — only for 2D corner mode
+  if (spec.wallB && placement.wallB) {
+    drawWallOverlay(ctx, w, h, strokeW, {
+      label: "B",
+      outlineColor: "#00b4d8",
+      fillColor: "rgba(0, 180, 216, 0.55)",
+      placement: placement.wallB,
+      panelCount: spec.wallB.panelCount,
+      doorPanelIndex: spec.wallB.doorPanelIndex,
+      frameTier: spec.frameTier,
+      frameColor: spec.frameColor,
+      siteWidthMm: spec.wallB.siteWidthMm,
+      siteHeightMm: spec.siteHeightMm,
+      partitionWidthMm: wallTotalWidth(spec.wallB),
+      heightMm: spec.heightMm,
+      startSide: spec.wallB.startSide,
+    });
   }
 
   const dataUrl = canvas.toDataURL("image/jpeg", 0.92);

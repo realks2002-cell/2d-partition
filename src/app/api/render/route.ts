@@ -149,14 +149,17 @@ export async function POST(req: NextRequest) {
     if (mode === "A") {
       images = await generateWithImagen(ai, basePrompt, count);
     } else if (mode === "C") {
+      const prompt = editInstruction
+        ? buildEditPrompt(editInstruction)
+        : basePrompt;
       const tasks = Array.from({ length: count }, () =>
         generateWithGeminiImage(
           ai,
-          basePrompt,
+          prompt,
           imageBase64,
           imageMimeType,
-          drawingBase64,
-          drawingMimeType,
+          editInstruction ? undefined : drawingBase64,
+          editInstruction ? undefined : drawingMimeType,
         ),
       );
       const results = await Promise.all(tasks);
