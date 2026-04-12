@@ -1,7 +1,8 @@
 {
   "version": "2.0",
-  "lastUpdated": "2026-04-10T20:07:18.754Z",
+  "lastUpdated": "2026-04-12T06:10:19.164Z",
   "activeFeatures": [
+    "auth-fcm",
     "render",
     "rander-app",
     "phase0",
@@ -10,10 +11,38 @@
     "result",
     "share",
     "annotate",
-    "dwg-convert"
+    "dwg-convert",
+    "signup",
+    "login",
+    "me",
+    "register",
+    "users",
+    "[id]",
+    "push",
+    "admin"
   ],
-  "primaryFeature": "render",
+  "primaryFeature": "auth-fcm",
   "features": {
+    "auth-fcm": {
+      "phase": "design",
+      "phaseNumber": 2,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [
+        "회원가입/로그인",
+        "단일세션",
+        "관리자페이지",
+        "FCM푸시"
+      ],
+      "documents": {
+        "plan": "docs/01-plan/features/auth-fcm.plan.md",
+        "design": "docs/02-design/features/auth-fcm.design.md"
+      },
+      "timestamps": {
+        "started": "2026-04-12T10:00:00.000Z",
+        "lastUpdated": "2026-04-12T10:00:00.000Z"
+      }
+    },
     "render": {
       "phase": "do",
       "phaseNumber": 3,
@@ -23,7 +52,7 @@
       "documents": {},
       "timestamps": {
         "started": "2026-04-08T07:26:27.331Z",
-        "lastUpdated": "2026-04-10T19:20:17.064Z"
+        "lastUpdated": "2026-04-12T04:26:54.840Z"
       },
       "lastFile": "/Users/kenny/Desktop/Task/rander-app/src/app/api/render/route.ts"
     },
@@ -36,9 +65,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-04-08T07:26:41.767Z",
-        "lastUpdated": "2026-04-10T20:07:18.754Z"
+        "lastUpdated": "2026-04-12T05:36:10.477Z"
       },
-      "lastFile": "/Users/kenny/Desktop/Task/rander-app/src/lib/store.ts"
+      "lastFile": "/Users/kenny/Desktop/Task/rander-app/src/app/page.tsx"
     },
     "phase0": {
       "phase": "do",
@@ -62,7 +91,7 @@
       "documents": {},
       "timestamps": {
         "started": "2026-04-08T07:30:48.483Z",
-        "lastUpdated": "2026-04-10T19:39:00.148Z"
+        "lastUpdated": "2026-04-12T05:14:05.480Z"
       },
       "lastFile": "/Users/kenny/Desktop/Task/rander-app/src/app/capture/page.tsx"
     },
@@ -75,7 +104,7 @@
       "documents": {},
       "timestamps": {
         "started": "2026-04-08T07:31:12.898Z",
-        "lastUpdated": "2026-04-10T20:02:06.401Z"
+        "lastUpdated": "2026-04-12T06:10:19.164Z"
       },
       "lastFile": "/Users/kenny/Desktop/Task/rander-app/src/app/spec/page.tsx"
     },
@@ -88,7 +117,7 @@
       "documents": {},
       "timestamps": {
         "started": "2026-04-08T07:31:29.692Z",
-        "lastUpdated": "2026-04-10T19:56:53.874Z"
+        "lastUpdated": "2026-04-12T03:59:47.855Z"
       },
       "lastFile": "/Users/kenny/Desktop/Task/rander-app/src/app/result/page.tsx"
     },
@@ -130,6 +159,110 @@
         "lastUpdated": "2026-04-08T07:52:49.586Z"
       },
       "lastFile": "/Users/kenny/Desktop/Task/rander-app/src/app/api/dwg-convert/route.ts"
+    },
+    "signup": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-04-12T04:26:09.518Z",
+        "lastUpdated": "2026-04-12T04:27:33.222Z"
+      },
+      "lastFile": "/Users/kenny/Desktop/Task/rander-app/src/app/signup/page.tsx"
+    },
+    "login": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-04-12T04:26:16.099Z",
+        "lastUpdated": "2026-04-12T04:27:16.146Z"
+      },
+      "lastFile": "/Users/kenny/Desktop/Task/rander-app/src/app/login/page.tsx"
+    },
+    "me": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-04-12T04:26:18.431Z",
+        "lastUpdated": "2026-04-12T04:26:18.431Z"
+      },
+      "lastFile": "/Users/kenny/Desktop/Task/rander-app/src/app/api/auth/me/route.ts"
+    },
+    "register": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-04-12T04:26:21.362Z",
+        "lastUpdated": "2026-04-12T04:26:21.362Z"
+      },
+      "lastFile": "/Users/kenny/Desktop/Task/rander-app/src/app/api/fcm/register/route.ts"
+    },
+    "users": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-04-12T04:26:29.036Z",
+        "lastUpdated": "2026-04-12T05:04:17.749Z"
+      },
+      "lastFile": "/Users/kenny/Desktop/Task/rander-app/src/app/api/admin/users/route.ts"
+    },
+    "[id]": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-04-12T04:26:33.243Z",
+        "lastUpdated": "2026-04-12T05:04:06.473Z"
+      },
+      "lastFile": "/Users/kenny/Desktop/Task/rander-app/src/app/api/admin/users/[id]/route.ts"
+    },
+    "push": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-04-12T04:26:46.350Z",
+        "lastUpdated": "2026-04-12T04:28:14.361Z"
+      },
+      "lastFile": "/Users/kenny/Desktop/Task/rander-app/src/app/admin/push/page.tsx"
+    },
+    "admin": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-04-12T04:28:05.421Z",
+        "lastUpdated": "2026-04-12T05:12:35.009Z"
+      },
+      "lastFile": "/Users/kenny/Desktop/Task/rander-app/src/app/admin/page.tsx"
     }
   },
   "pipeline": {
@@ -140,7 +273,7 @@
   "session": {
     "startedAt": "2026-04-08T06:21:31.769Z",
     "onboardingCompleted": false,
-    "lastActivity": "2026-04-10T20:07:18.754Z"
+    "lastActivity": "2026-04-12T06:10:19.164Z"
   },
   "history": [
     {
@@ -1958,6 +2091,864 @@
     {
       "timestamp": "2026-04-10T20:07:18.754Z",
       "feature": "rander-app",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T03:53:18.823Z",
+      "feature": "rander-app",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T03:53:24.454Z",
+      "feature": "rander-app",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T03:53:29.897Z",
+      "feature": "rander-app",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T03:53:35.679Z",
+      "feature": "rander-app",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T03:53:40.568Z",
+      "feature": "rander-app",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T03:53:46.971Z",
+      "feature": "rander-app",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T03:53:52.824Z",
+      "feature": "rander-app",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T03:53:59.729Z",
+      "feature": "rander-app",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T03:54:57.575Z",
+      "feature": "rander-app",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T03:55:03.478Z",
+      "feature": "rander-app",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T03:55:09.829Z",
+      "feature": "rander-app",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T03:55:16.717Z",
+      "feature": "rander-app",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T03:55:23.482Z",
+      "feature": "rander-app",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T03:55:31.101Z",
+      "feature": "rander-app",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T03:55:36.374Z",
+      "feature": "rander-app",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T03:55:51.915Z",
+      "feature": "rander-app",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T03:55:57.010Z",
+      "feature": "rander-app",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T03:56:03.684Z",
+      "feature": "rander-app",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T03:56:13.418Z",
+      "feature": "rander-app",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T03:56:20.549Z",
+      "feature": "rander-app",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T03:56:39.374Z",
+      "feature": "render",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T03:56:46.504Z",
+      "feature": "render",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T03:57:01.521Z",
+      "feature": "render",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T03:57:17.549Z",
+      "feature": "render",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T03:57:38.008Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T03:57:51.343Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T03:58:09.772Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T03:58:15.542Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T03:58:20.797Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T03:58:31.838Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T03:58:38.707Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T03:58:48.238Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T03:58:52.996Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T03:59:04.743Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T03:59:20.225Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T03:59:35.399Z",
+      "feature": "result",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T03:59:47.855Z",
+      "feature": "result",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T04:07:36.596Z",
+      "feature": "rander-app",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T04:25:23.890Z",
+      "feature": "rander-app",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T04:25:27.184Z",
+      "feature": "rander-app",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T04:25:29.019Z",
+      "feature": "rander-app",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T04:25:40.801Z",
+      "feature": "rander-app",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T04:25:54.996Z",
+      "feature": "rander-app",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T04:26:09.518Z",
+      "feature": "signup",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T04:26:16.099Z",
+      "feature": "login",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T04:26:18.431Z",
+      "feature": "me",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T04:26:21.362Z",
+      "feature": "register",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T04:26:29.036Z",
+      "feature": "users",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T04:26:33.243Z",
+      "feature": "[id]",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T04:26:46.350Z",
+      "feature": "push",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T04:26:54.840Z",
+      "feature": "render",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T04:27:16.146Z",
+      "feature": "login",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T04:27:33.222Z",
+      "feature": "signup",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T04:27:43.560Z",
+      "feature": "rander-app",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T04:28:05.421Z",
+      "feature": "admin",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T04:28:14.361Z",
+      "feature": "push",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T04:28:19.025Z",
+      "feature": "rander-app",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T04:28:23.326Z",
+      "feature": "rander-app",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T04:48:53.793Z",
+      "feature": "[id]",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T04:49:07.745Z",
+      "feature": "users",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T04:50:03.055Z",
+      "feature": "admin",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T04:51:36.978Z",
+      "feature": "admin",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T04:52:26.912Z",
+      "feature": "[id]",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T04:52:36.989Z",
+      "feature": "users",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T04:52:42.874Z",
+      "feature": "users",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T04:52:53.088Z",
+      "feature": "admin",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T04:52:58.250Z",
+      "feature": "admin",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T04:53:03.784Z",
+      "feature": "admin",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T04:53:13.855Z",
+      "feature": "admin",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T04:53:23.230Z",
+      "feature": "admin",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T04:53:33.031Z",
+      "feature": "admin",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T04:53:43.408Z",
+      "feature": "admin",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:00:27.355Z",
+      "feature": "admin",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:02:00.420Z",
+      "feature": "admin",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:02:15.517Z",
+      "feature": "admin",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:02:28.469Z",
+      "feature": "admin",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:02:35.112Z",
+      "feature": "admin",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:02:58.936Z",
+      "feature": "admin",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:03:13.500Z",
+      "feature": "admin",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:03:31.415Z",
+      "feature": "admin",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:03:51.827Z",
+      "feature": "admin",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:04:06.473Z",
+      "feature": "[id]",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:04:12.370Z",
+      "feature": "users",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:04:17.749Z",
+      "feature": "users",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:04:29.350Z",
+      "feature": "admin",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:04:35.879Z",
+      "feature": "admin",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:04:42.164Z",
+      "feature": "admin",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:04:48.806Z",
+      "feature": "admin",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:04:54.330Z",
+      "feature": "admin",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:05:03.801Z",
+      "feature": "admin",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:05:14.514Z",
+      "feature": "admin",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:05:23.533Z",
+      "feature": "admin",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:10:06.336Z",
+      "feature": "admin",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:10:16.801Z",
+      "feature": "admin",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:10:27.974Z",
+      "feature": "admin",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:10:34.041Z",
+      "feature": "admin",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:12:02.240Z",
+      "feature": "admin",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:12:35.009Z",
+      "feature": "admin",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:13:55.878Z",
+      "feature": "rander-app",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:14:05.480Z",
+      "feature": "capture",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:35:30.056Z",
+      "feature": "rander-app",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:35:53.884Z",
+      "feature": "rander-app",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:36:10.477Z",
+      "feature": "rander-app",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:43:01.252Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:43:10.949Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:43:25.497Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:43:33.543Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:43:45.356Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:43:55.997Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:44:02.559Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:44:08.805Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:44:15.407Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:44:20.988Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:44:28.086Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:44:33.488Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:44:39.422Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:44:50.478Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:44:59.173Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:45:08.009Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:45:14.881Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:46:56.320Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:47:09.740Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:48:00.061Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:49:44.021Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:51:30.579Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:51:56.950Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:52:18.023Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:52:45.076Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:53:02.113Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:53:16.089Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:53:44.609Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:53:53.982Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:54:09.056Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:54:35.533Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:54:51.704Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:57:48.906Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:57:59.231Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T05:58:07.199Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T06:06:27.616Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T06:07:02.375Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T06:07:26.543Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T06:08:02.970Z",
+      "feature": "spec",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-04-12T06:10:19.164Z",
+      "feature": "spec",
       "phase": "do",
       "action": "updated"
     }

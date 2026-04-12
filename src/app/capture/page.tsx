@@ -80,7 +80,7 @@ export default function CapturePage() {
       </div>
 
       <footer className="pt-4 pb-3 flex items-center justify-between rise rise-3">
-        <span className="text-[11px] text-[var(--muted)]">화담 디자인</span>
+        <span className="text-[11px] text-[var(--muted)]">비즈스타트</span>
         <span className="mono text-[11px] text-[var(--muted)]">© 2026</span>
       </footer>
     </main>

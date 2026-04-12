@@ -121,8 +121,8 @@ async function generateWithGeminiImage(
 }
 
 export async function POST(req: NextRequest) {
-  const authErr = checkAuth(req);
-  if (authErr) return withCors(authErr);
+  const auth = await checkAuth(req);
+  if (auth instanceof NextResponse) return withCors(auth);
   const rateErr = checkRateLimit(req);
   if (rateErr) return withCors(rateErr);
   try {

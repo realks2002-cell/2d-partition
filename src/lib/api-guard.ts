@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { verifyToken } from "./auth";
+import { createServerClient } from "./supabase";
 
-const WINDOW_MS = 60_000; // 1 minute
+const WINDOW_MS = 60_000;
 const MAX_PER_WINDOW = 10;
 const DAILY_LIMIT = 200;
 
@@ -52,13 +54,52 @@ export function checkRateLimit(req: NextRequest): NextResponse | null {
   return null;
 }
 
-export function checkAuth(req: NextRequest): NextResponse | null {
-  const expected = process.env.APP_API_TOKEN;
-  if (!expected) return null;
+export type AuthPayload = {
+  userId: number;
+  role: string;
+  deviceId: string;
+};
+
+export async function checkAuth(
+  req: NextRequest,
+): Promise<AuthPayload | NextResponse> {
   const auth = req.headers.get("authorization") ?? "";
   const token = auth.startsWith("Bearer ") ? auth.slice(7) : "";
-  if (token !== expected) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!token) {
+    return NextResponse.json({ error: "인증이 필요합니다" }, { status: 401 });
+  }
+  try {
+    const payload = await verifyToken(token);
+    const sb = createServerClient();
+    const { data: session } = await sb
+      .from("partiApp_sessions")
+      .select("token")
+      .eq("user_id", payload.userId)
+      .single();
+    if (!session || session.token !== token) {
+      return NextResponse.json(
+        { error: "다른 기기에서 로그인됨" },
+        { status: 401 },
+      );
+    }
+    return payload;
+  } catch {
+    return NextResponse.json(
+      { error: "인증이 만료되었습니다" },
+      { status: 401 },
+    );
+  }
+}
+
+export function checkAdmin(
+  auth: AuthPayload | NextResponse,
+): NextResponse | null {
+  if (auth instanceof NextResponse) return auth;
+  if (auth.role !== "admin") {
+    return NextResponse.json(
+      { error: "관리자 권한이 필요합니다" },
+      { status: 403 },
+    );
   }
   return null;
 }

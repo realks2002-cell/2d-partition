@@ -67,17 +67,17 @@ export default function Home() {
         className="hidden"
       />
 
-      <div className="flex-1 min-h-0 flex items-center justify-center rise rise-3">
+      <div className="flex-1 min-h-0 flex items-center justify-center rise rise-3" style={{ marginTop: -200 }}>
         <button
           onClick={() => fileRef.current?.click()}
           disabled={busy}
           className="flex flex-col items-center gap-5 active:scale-95 transition disabled:opacity-50"
         >
           <div
-            className="w-28 h-28 rounded-full bg-[var(--ink)] text-[var(--bg)] flex items-center justify-center"
+            className="w-14 h-14 rounded-full bg-[var(--ink)] text-[var(--bg)] flex items-center justify-center"
             style={{ boxShadow: "var(--shadow-cta)" }}
           >
-            <Camera size={44} strokeWidth={1.5} />
+            <Camera size={22} strokeWidth={1.5} />
           </div>
           <div className="text-center">
             <div className="display text-[20px] leading-none mb-1.5">
@@ -89,7 +89,7 @@ export default function Home() {
       </div>
 
       <footer className="pt-4 pb-3 flex items-center justify-between rise rise-4">
-        <span className="text-[11px] text-[var(--muted)]">화담 디자인</span>
+        <span className="text-[11px] text-[var(--muted)]">비즈스타트</span>
         <span className="mono text-[11px] text-[var(--muted)]">© 2026</span>
       </footer>
     </main>
