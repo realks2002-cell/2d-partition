@@ -50,7 +50,7 @@ export default function LoginPage() {
     <main className="h-[100dvh] max-w-md mx-auto flex flex-col px-6 pt-safe pb-safe">
       <section className="pt-16 pb-8 rise rise-1">
         <div className="eyebrow mb-3">Partition Visualizer</div>
-        <h1 className="display-tight text-[22px] mb-2">화담 로그인</h1>
+        <h1 className="display-tight text-[22px] mb-2">로그인</h1>
         <p className="text-[13px] leading-[1.55] text-[var(--ink-3)]">
           계정으로 로그인하세요.
         </p>

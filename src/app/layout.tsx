@@ -3,12 +3,12 @@ import "./globals.css";
 import AuthGuard from "@/components/AuthGuard";
 
 export const metadata: Metadata = {
-  title: "화담 칸막이 시뮬레이터",
+  title: "칸막이Go 시뮬레이터",
   description: "현장 → 치수 → AI 렌더링 → 공유",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "화담",
+    title: "칸막이Go",
   },
 };
 
