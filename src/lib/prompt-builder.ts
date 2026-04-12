@@ -209,6 +209,42 @@ export function buildRenderPrompt(
   return parts.filter(Boolean).join(" ");
 }
 
+export function buildDrawingPrompt(
+  frameColor: FrameColor,
+  placement: PartitionPlacement | null | undefined,
+  isCorner: boolean,
+): string {
+  const frameColorLabel = FRAME_COLOR_LABEL[frameColor];
+
+  if (isCorner) {
+    return [
+      `TASK: This is a strict IMAGE EDITING task on a CORNER PHOTO (ㄴ/L-shape interior). Install TWO SEPARATE glass partitions — one on Wall A and one on Wall B — based EXCLUSIVELY on the drawing references provided. Start from the exact reference photo pixels and only ADD the partitions. Preserve 100% of the reference photo's pixels except where the new partitions are placed.`,
+      `PLACEMENT MARKERS (CRITICAL): The first image is the site photo with UI overlays. The BRIGHT MAGENTA semi-transparent region marks Wall A (the left wall in the corner). The BRIGHT CYAN semi-transparent region marks Wall B (the right wall in the corner). Render each partition to fill its marker exactly. REMOVE all magenta, cyan, dashed outlines, and white halos from the output — zero colored overlay artifacts may remain.`,
+      `DRAWING REFERENCES (SOURCE OF TRUTH FOR VISUAL DESIGN): The SECOND image is the design reference for Wall A — copy its partition APPEARANCE (panel count, frame proportions, mullion layout, door position, door direction) EXACTLY into the magenta region. The THIRD image is the design reference for Wall B — copy its partition APPEARANCE EXACTLY into the cyan region. IGNORE all dimension lines, numbers, measurements, text, annotations, and background content in both drawings — use ONLY the partition's visual layout. DO NOT copy the drawings' colors, backgrounds, or anything outside the partition itself.`,
+      `FRAME COLOR (OVERRIDE): Regardless of the drawings' line colors, ALL frame elements on BOTH partitions MUST be rendered in ${frameColorLabel}. Every outer perimeter, vertical mullion, horizontal mullion, and door frame uses this single uniform color.`,
+      `GLASS RENDERING: Each glass panel must look like REAL 10-12mm tempered clear glass — high transparency with the wall/floor/objects behind visible through it, subtle surface reflections of the room, thin bright green-blue edge highlight where glass meets frame, small specular highlights at light sources, very slight green tint at edges. ALL glass must be CLEAR TRANSPARENT — never blue, never tinted, never cyan.`,
+      `ABSOLUTE PRESERVATION: The inside corner line, all walls, ceiling, floor, existing doors/windows/fixtures/furniture/outlets/lights/shadows/reflections, wall colors and textures, floor material and pattern — ALL must remain pixel-accurately identical to the reference photo outside the two partition markers. Do NOT change camera angle, perspective, framing, or lighting direction. Do NOT add any text, letters, logos, people, or watermarks. Do NOT copy letters or annotations from the drawing references.`,
+    ].join(" ");
+  }
+
+  const isQuad =
+    !!placement &&
+    placement.topX1 !== undefined &&
+    placement.topY1 !== undefined &&
+    placement.topX2 !== undefined &&
+    placement.topY2 !== undefined;
+  const shapeWord = isQuad ? "QUADRILATERAL (4-sided perspective polygon)" : "RECTANGLE";
+
+  return [
+    `TASK: This is a strict IMAGE EDITING task. Install ONE glass partition based EXCLUSIVELY on the drawing reference provided. Start from the exact reference photo pixels and only ADD the partition. Preserve 100% of the reference photo's pixels except where the new partition is placed.`,
+    `PLACEMENT MARKER (CRITICAL): The first image is the site photo marked with a BRIGHT MAGENTA semi-transparent ${shapeWord}. Render the partition to fill this marker exactly. ${isQuad ? "The magenta shape is a 4-corner polygon that follows the perspective of the room." : ""} REMOVE all magenta fill, dashed outlines, and white halos from the output — zero overlay artifacts may remain.`,
+    `DRAWING REFERENCE (SOURCE OF TRUTH FOR VISUAL DESIGN): The SECOND image is the design reference. Copy the partition's APPEARANCE (panel count, frame proportions, mullion layout, door position, door direction) EXACTLY into the magenta region. IGNORE all dimension lines, numbers, measurements, text, annotations, and background content in the drawing — use ONLY the partition's visual layout. DO NOT copy the drawing's colors, background, or anything outside the partition itself.`,
+    `FRAME COLOR (OVERRIDE): Regardless of the drawing's line color, ALL frame elements MUST be rendered in ${frameColorLabel}. Every outer perimeter, vertical mullion, horizontal mullion, and door frame uses this single uniform color.`,
+    `GLASS RENDERING: Each glass panel must look like REAL 10-12mm tempered clear glass — high transparency with the wall/floor/objects behind visible through it, subtle surface reflections of the room, thin bright green-blue edge highlight where glass meets frame, small specular highlights at light sources, very slight green tint at edges. ALL glass must be CLEAR TRANSPARENT — never blue, never tinted, never cyan.`,
+    `ABSOLUTE PRESERVATION: All walls, ceiling, floor, existing doors/windows/fixtures/furniture/outlets/lights/shadows/reflections, wall colors and textures, floor material and pattern — ALL must remain pixel-accurately identical to the reference photo outside the magenta marker. Do NOT change camera angle, perspective, framing, or lighting direction. Do NOT add any text, letters, logos, people, or watermarks. Do NOT copy letters or annotations from the drawing reference.`,
+  ].join(" ");
+}
+
 export function buildEditPrompt(instruction: string): string {
   return `Modify the rendered partition based on the following instruction while keeping the rest of the image identical: ${instruction}. Maintain the same perspective, lighting, and surrounding room.`;
 }

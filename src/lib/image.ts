@@ -101,6 +101,8 @@ interface WallOverlayOptions {
   startSide: StartSide;
   /** Skip the startSide corridor shift (used when drawing wall B which shares edge with A). */
   skipCorridorShift?: boolean;
+  /** When true, skip all internal markup (mullions, 2-tier bar, door outline). Only draw the boundary. */
+  drawingMode?: boolean;
 }
 
 function drawWallOverlay(
@@ -125,6 +127,7 @@ function drawWallOverlay(
     heightMm,
     startSide,
     skipCorridorShift,
+    drawingMode,
   } = opts;
 
   const bottomA: Pt = { x: placement.x1 * w, y: placement.y1 * h };
@@ -163,6 +166,7 @@ function drawWallOverlay(
   if (
     !hasTop &&
     !skipCorridorShift &&
+    !drawingMode &&
     siteWidthMm > 0 &&
     partitionWidthMm > 0 &&
     partitionWidthMm < siteWidthMm
@@ -240,6 +244,12 @@ function drawWallOverlay(
   const LIME = FRAME_HEX[frameColor];
   ctx.lineCap = "butt";
 
+  if (drawingMode) {
+    // drawing-first mode: boundary only, no internal markup
+    void label;
+    return;
+  }
+
   // vertical panel dividers
   if (panelCount > 1) {
     ctx.strokeStyle = LIME;
@@ -303,7 +313,9 @@ export async function burnPlacementOntoImage(
   sourceDataUrl: string,
   spec: PartitionSpec,
   placement: PartitionPlacement,
+  options?: { drawingMode?: boolean },
 ): Promise<{ dataUrl: string; base64: string; mimeType: string }> {
+  const drawingMode = options?.drawingMode === true;
   const img = await new Promise<HTMLImageElement>((resolve, reject) => {
     const i = new Image();
     i.onload = () => resolve(i);
@@ -345,6 +357,7 @@ export async function burnPlacementOntoImage(
     partitionWidthMm: spec.panelCount * spec.panelWidthMm,
     heightMm: spec.heightMm,
     startSide: spec.startSide,
+    drawingMode,
   });
 
   // Wall B overlay (cyan) — only for 2D corner mode
@@ -363,6 +376,7 @@ export async function burnPlacementOntoImage(
       partitionWidthMm: wallTotalWidth(spec.wallB),
       heightMm: spec.heightMm,
       startSide: spec.wallB.startSide,
+      drawingMode,
     });
   }
 

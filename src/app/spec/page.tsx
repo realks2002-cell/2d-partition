@@ -39,7 +39,10 @@ export default function SpecPage() {
     sourceMimeType,
     drawingImage,
     drawingMimeType,
+    drawingImageB,
+    drawingMimeTypeB,
     setDrawing,
+    setDrawingB,
     placement,
     setPlacement,
     spec,
@@ -52,8 +55,13 @@ export default function SpecPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const drawingFileRef = useRef<HTMLInputElement>(null);
+  const drawingFileRefB = useRef<HTMLInputElement>(null);
 
   const isCorner = dimension === 2 && !!spec.wallB;
+  const hasDrawing = isCorner
+    ? !!(drawingImage && drawingImageB)
+    : !!drawingImage;
+  const hasAnyDrawing = !!(drawingImage || drawingImageB);
 
   const handleDrawingFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
@@ -61,6 +69,17 @@ export default function SpecPage() {
     try {
       const r = await resizeImageFile(f);
       setDrawing(r.dataUrl, r.mimeType);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : String(err));
+    }
+  };
+
+  const handleDrawingFileB = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    try {
+      const r = await resizeImageFile(f);
+      setDrawingB(r.dataUrl, r.mimeType);
     } catch (err) {
       alert(err instanceof Error ? err.message : String(err));
     }
@@ -130,13 +149,20 @@ export default function SpecPage() {
   };
 
   const render = async () => {
+    // Validate drawing requirements before burning
+    if (isCorner && hasAnyDrawing && !(drawingImage && drawingImageB)) {
+      setError("ㄴ 형태는 벽 A, B 도면을 모두 올려야 합니다");
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
       let imageBase64: string;
       let imageMimeType: string;
       if (placement) {
-        const burned = await burnPlacementOntoImage(sourceImage, spec, placement);
+        const burned = await burnPlacementOntoImage(sourceImage, spec, placement, {
+          drawingMode: hasDrawing,
+        });
         imageBase64 = burned.base64;
         imageMimeType = burned.mimeType;
       } else {
@@ -145,6 +171,7 @@ export default function SpecPage() {
         imageMimeType = sourceMimeType ?? "image/jpeg";
       }
       const drawingB64 = drawingImage?.split(",")[1];
+      const drawingB64B = drawingImageB?.split(",")[1];
       const res = await fetch(apiUrl("/api/render"), {
         method: "POST",
         headers: authHeaders(),
@@ -156,6 +183,8 @@ export default function SpecPage() {
           imageMimeType,
           drawingBase64: drawingB64,
           drawingMimeType: drawingB64 ? drawingMimeType : undefined,
+          drawingBase64B: drawingB64B,
+          drawingMimeTypeB: drawingB64B ? drawingMimeTypeB : undefined,
           count: 1,
         }),
       });
@@ -200,7 +229,11 @@ export default function SpecPage() {
       </header>
 
       {/* REF — Drawing reference */}
-      <Section idx="REF" title="참고 도면" tag="optional">
+      <Section
+        idx="REF"
+        title="참고 도면"
+        tag={isCorner ? "A·B 필수" : "optional"}
+      >
         <input
           ref={drawingFileRef}
           type="file"
@@ -208,37 +241,49 @@ export default function SpecPage() {
           onChange={handleDrawingFile}
           className="hidden"
         />
-        {drawingImage ? (
-          <div className="relative surface overflow-hidden">
-            <img
-              src={drawingImage}
-              alt=""
-              className="w-full max-h-14 object-contain bg-[var(--surface-2)]"
+        <input
+          ref={drawingFileRefB}
+          type="file"
+          accept=".png,.jpg,.jpeg,image/png,image/jpeg"
+          onChange={handleDrawingFileB}
+          className="hidden"
+        />
+        {isCorner ? (
+          <div className="grid grid-cols-2 gap-2">
+            <DrawingSlot
+              label="벽 A (왼쪽)"
+              image={drawingImage}
+              onPick={() => drawingFileRef.current?.click()}
+              onClear={() => setDrawing(null, null)}
             />
-            <button
-              onClick={() => setDrawing(null, null)}
-              className="absolute top-1 right-1 btn-icon"
-              style={{ width: 24, height: 24 }}
-              aria-label="도면 제거"
-            >
-              <X size={11} />
-            </button>
+            <DrawingSlot
+              label="벽 B (오른쪽)"
+              image={drawingImageB}
+              onPick={() => drawingFileRefB.current?.click()}
+              onClear={() => setDrawingB(null, null)}
+            />
           </div>
         ) : (
-          <button
-            onClick={() => drawingFileRef.current?.click()}
-            className="w-full py-2.5 rounded-[var(--radius-md)] border border-dashed border-[var(--line-2)] flex flex-col items-center gap-0.5 bg-[var(--surface)] transition-colors active:bg-[var(--surface-2)]"
-          >
-            <Upload size={14} className="text-[var(--ink-3)]" />
-            <span className="text-[11px] font-medium text-[var(--ink)]">
-              도면 이미지 첨부
-            </span>
-            <span className="text-[9px] text-[var(--muted)]">Style guide — 치수/주석 무시</span>
-          </button>
+          <DrawingSlot
+            image={drawingImage}
+            onPick={() => drawingFileRef.current?.click()}
+            onClear={() => setDrawing(null, null)}
+          />
+        )}
+        {hasDrawing && (
+          <p className="text-[10px] text-[var(--muted)] mt-2">
+            도면 우선 모드 — 칸 수/도어/프레임 단수 설정은 무시되고 도면이 그대로 반영됩니다.
+          </p>
+        )}
+        {isCorner && hasAnyDrawing && !hasDrawing && (
+          <p className="text-[10px] text-[var(--accent)] mt-2">
+            ㄴ 형태는 벽 A, B 도면을 모두 올려야 합니다.
+          </p>
         )}
       </Section>
 
       {/* 01 — Site dimensions */}
+      {!hasDrawing && (
       <Section idx="01" title="현장 치수">
         {isCorner ? (
           <div className="space-y-3">
@@ -280,8 +325,10 @@ export default function SpecPage() {
           </div>
         )}
       </Section>
+      )}
 
       {/* 02 — Panel composition */}
+      {!hasDrawing && (
       <Section idx="02" title="칸 구성">
         {isCorner && wallB ? (
           <div className="space-y-4">
@@ -350,6 +397,7 @@ export default function SpecPage() {
           </>
         )}
       </Section>
+      )}
 
       {/* 03 — Frame color */}
       <Section idx="03" title="프레임 색상">
@@ -372,6 +420,7 @@ export default function SpecPage() {
       </Section>
 
       {/* 04 — Frame tier */}
+      {!hasDrawing && (
       <Section idx="04" title="프레임 단수">
         <div className="seg grid-cols-2">
           {([1, 2] as FrameTier[]).map((t) => (
@@ -385,9 +434,10 @@ export default function SpecPage() {
           ))}
         </div>
       </Section>
+      )}
 
       {/* 05 — Start side (only shown when corridor may exist — 1D mode) */}
-      {!isCorner && (
+      {!hasDrawing && !isCorner && (
         <Section idx="05" title="벽 내 시작 방향">
           <div className="seg grid-cols-3">
             {(["left", "center", "right"] as StartSide[]).map((s) => (
@@ -404,6 +454,7 @@ export default function SpecPage() {
       )}
 
       {/* 06 — Door position */}
+      {!hasDrawing && (
       <Section idx="06" title="도어 위치">
         {isCorner && wallB ? (
           <div className="space-y-3">
@@ -446,6 +497,7 @@ export default function SpecPage() {
           </div>
         )}
       </Section>
+      )}
 
       {/* 07 — Placement */}
       <Section idx="07" title="설치 위치 지정">
@@ -482,6 +534,7 @@ export default function SpecPage() {
                 }
               : undefined
           }
+          drawingMode={hasDrawing}
         />
       </Section>
 
@@ -519,6 +572,55 @@ export default function SpecPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+function DrawingSlot({
+  label,
+  image,
+  onPick,
+  onClear,
+}: {
+  label?: string;
+  image: string | null;
+  onPick: () => void;
+  onClear: () => void;
+}) {
+  if (image) {
+    return (
+      <div className="relative surface overflow-hidden">
+        {label && (
+          <div className="absolute top-1 left-2 text-[9px] font-medium text-[var(--ink)] bg-[var(--surface)]/80 px-1 rounded">
+            {label}
+          </div>
+        )}
+        <img
+          src={image}
+          alt=""
+          className="w-full max-h-14 object-contain bg-[var(--surface-2)]"
+        />
+        <button
+          onClick={onClear}
+          className="absolute top-1 right-1 btn-icon"
+          style={{ width: 24, height: 24 }}
+          aria-label="도면 제거"
+        >
+          <X size={11} />
+        </button>
+      </div>
+    );
+  }
+  return (
+    <button
+      onClick={onPick}
+      className="w-full py-2.5 rounded-[var(--radius-md)] border border-dashed border-[var(--line-2)] flex flex-col items-center gap-0.5 bg-[var(--surface)] transition-colors active:bg-[var(--surface-2)]"
+    >
+      <Upload size={14} className="text-[var(--ink-3)]" />
+      <span className="text-[11px] font-medium text-[var(--ink)]">
+        {label ?? "도면 이미지 첨부"}
+      </span>
+      <span className="text-[9px] text-[var(--muted)]">치수/주석 무시</span>
+    </button>
   );
 }
 

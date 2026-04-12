@@ -26,6 +26,8 @@ interface Props {
   mode: "single" | "corner";
   wallA: WallConfig;
   wallB?: WallConfig;
+  /** When true, skip internal mullion/door preview — only show boundary quads. */
+  drawingMode?: boolean;
 }
 
 const A_BOTTOM = "#f97316"; // orange
@@ -80,6 +82,7 @@ export function PlacementCanvas({
   mode,
   wallA,
   wallB,
+  drawingMode = false,
 }: Props) {
   const mullionColor =
     frameColor === "white"
@@ -167,6 +170,7 @@ export function PlacementCanvas({
 
     if (
       !hasTop &&
+      !drawingMode &&
       wall.widthRatio !== undefined &&
       wall.widthRatio > 0 &&
       wall.widthRatio < 1
@@ -244,6 +248,23 @@ export function PlacementCanvas({
         (1 - u) * v * tl.y +
         u * v * tr.y,
     });
+
+    if (drawingMode) {
+      // drawing-first mode: boundary only, still show label in corner mode
+      if (mode === "corner") {
+        const labelPt = qp(0.08, 0.88);
+        const sz = 18;
+        ctx.font = `bold ${sz}px sans-serif`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillStyle = "#ffffff";
+        ctx.strokeStyle = stroke;
+        ctx.lineWidth = 3;
+        ctx.strokeText(label, labelPt.x, labelPt.y);
+        ctx.fillText(label, labelPt.x, labelPt.y);
+      }
+      return;
+    }
 
     if (wall.panelCount > 1) {
       ctx.strokeStyle = mullionColor;
@@ -469,6 +490,7 @@ export function PlacementCanvas({
     wallB,
     stage,
     mullionColor,
+    drawingMode,
   ]);
 
   const getPoint = (e: React.PointerEvent): Point => {

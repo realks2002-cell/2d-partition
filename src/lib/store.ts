@@ -32,6 +32,8 @@ export interface SessionState {
   sourceKind: SourceKind | null;
   drawingImage: string | null;
   drawingMimeType: string | null;
+  drawingImageB: string | null;
+  drawingMimeTypeB: string | null;
   scale: number | null;
   annotations: DimensionAnnotation[];
   placement: PartitionPlacement | null;
@@ -45,6 +47,7 @@ export interface SessionState {
 
   setSource: (img: string, mime: string, kind: SourceKind) => void;
   setDrawing: (img: string | null, mime: string | null) => void;
+  setDrawingB: (img: string | null, mime: string | null) => void;
   setScale: (scale: number) => void;
   addAnnotation: (a: DimensionAnnotation) => void;
   removeAnnotation: (id: string) => void;
@@ -88,6 +91,8 @@ export const useSession = create<SessionState>()(
       sourceKind: null,
       drawingImage: null,
       drawingMimeType: null,
+      drawingImageB: null,
+      drawingMimeTypeB: null,
       scale: null,
       annotations: [],
       placement: null,
@@ -104,6 +109,7 @@ export const useSession = create<SessionState>()(
               ? { ...s.spec, wallB: s.spec.wallB ?? { ...DEFAULT_WALL_B } }
               : { ...s.spec, wallB: undefined },
           placement: null,
+          ...(d === 1 ? { drawingImageB: null, drawingMimeTypeB: null } : {}),
         })),
 
       setSource: (img, mime, kind) => {
@@ -113,6 +119,8 @@ export const useSession = create<SessionState>()(
           sourceKind: kind,
           drawingImage: null,
           drawingMimeType: null,
+          drawingImageB: null,
+          drawingMimeTypeB: null,
           annotations: [],
           scale: null,
           placement: null,
@@ -124,6 +132,7 @@ export const useSession = create<SessionState>()(
         void saveSelected(null);
       },
       setDrawing: (img, mime) => set({ drawingImage: img, drawingMimeType: mime }),
+      setDrawingB: (img, mime) => set({ drawingImageB: img, drawingMimeTypeB: mime }),
       setScale: (scale) => set({ scale }),
       addAnnotation: (a) =>
         set((s) => ({ annotations: [...s.annotations, a] })),
@@ -161,6 +170,8 @@ export const useSession = create<SessionState>()(
           sourceKind: null,
           drawingImage: null,
           drawingMimeType: null,
+          drawingImageB: null,
+          drawingMimeTypeB: null,
           scale: null,
           annotations: [],
           placement: null,
@@ -188,7 +199,7 @@ export const useSession = create<SessionState>()(
     }),
     {
       name: "hwadam-session",
-      version: 7,
+      version: 8,
       migrate: (persistedState: unknown, version: number) => {
         const state = (persistedState ?? {}) as Record<string, unknown>;
         if (version < 2) {
@@ -223,6 +234,10 @@ export const useSession = create<SessionState>()(
         if (version < 7) {
           // v6 → v7: force reset spec to new defaults (panelCount 5, panelWidth 800)
           return { ...state, spec: DEFAULT_SPEC, placement: null };
+        }
+        if (version < 8) {
+          // v7 → v8: add drawingImageB/drawingMimeTypeB fields (drawings are volatile, not persisted)
+          return state;
         }
         return state;
       },

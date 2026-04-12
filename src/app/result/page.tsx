@@ -17,6 +17,8 @@ export default function ResultPage() {
     sourceMimeType,
     drawingImage,
     drawingMimeType,
+    drawingImageB,
+    drawingMimeTypeB,
     placement,
     spec,
     renderings,
@@ -25,6 +27,10 @@ export default function ResultPage() {
     setRenderings,
     reset,
   } = useSession();
+  const isCorner = !!(spec.wallB && placement?.wallB);
+  const hasDrawing = isCorner
+    ? !!(drawingImage && drawingImageB)
+    : !!drawingImage;
   const [instruction, setInstruction] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,13 +48,19 @@ export default function ResultPage() {
 
   const rerender = async () => {
     if (!sourceImage) return;
+    if (isCorner && (drawingImage || drawingImageB) && !(drawingImage && drawingImageB)) {
+      setError("ㄴ 형태는 벽 A, B 도면을 모두 올려야 합니다");
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
       let imageBase64: string;
       let imageMimeType: string;
       if (placement) {
-        const burned = await burnPlacementOntoImage(sourceImage, spec, placement);
+        const burned = await burnPlacementOntoImage(sourceImage, spec, placement, {
+          drawingMode: hasDrawing,
+        });
         imageBase64 = burned.base64;
         imageMimeType = burned.mimeType;
       } else {
@@ -57,6 +69,7 @@ export default function ResultPage() {
         imageMimeType = sourceMimeType ?? "image/jpeg";
       }
       const drawingB64 = drawingImage?.split(",")[1];
+      const drawingB64B = drawingImageB?.split(",")[1];
       const res = await fetch(apiUrl("/api/render"), {
         method: "POST",
         headers: authHeaders(),
@@ -68,6 +81,8 @@ export default function ResultPage() {
           imageMimeType,
           drawingBase64: drawingB64,
           drawingMimeType: drawingB64 ? drawingMimeType : undefined,
+          drawingBase64B: drawingB64B,
+          drawingMimeTypeB: drawingB64B ? drawingMimeTypeB : undefined,
           count: 1,
         }),
       });

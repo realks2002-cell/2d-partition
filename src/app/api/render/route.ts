@@ -3,6 +3,7 @@ import { GoogleGenAI, Modality } from "@google/genai";
 import {
   buildRenderPrompt,
   buildEditPrompt,
+  buildDrawingPrompt,
   type PartitionSpec,
   type PartitionPlacement,
 } from "@/lib/prompt-builder";
@@ -39,6 +40,8 @@ interface RenderRequest {
   imageMimeType: string;
   drawingBase64?: string;
   drawingMimeType?: string;
+  drawingBase64B?: string;
+  drawingMimeTypeB?: string;
   editInstruction?: string;
   count?: number;
 }
@@ -76,8 +79,10 @@ async function generateWithGeminiImage(
   prompt: string,
   refImageBase64: string,
   refMimeType: string,
-  drawingBase64?: string,
-  drawingMimeType?: string,
+  drawingABase64?: string,
+  drawingAMimeType?: string,
+  drawingBBase64?: string,
+  drawingBMimeType?: string,
 ): Promise<string[]> {
   const parts: Array<
     { text: string } | { inlineData: { data: string; mimeType: string } }
@@ -85,12 +90,14 @@ async function generateWithGeminiImage(
     { text: prompt },
     { inlineData: { data: refImageBase64, mimeType: refMimeType } },
   ];
-  if (drawingBase64 && drawingMimeType) {
+  if (drawingABase64 && drawingAMimeType) {
     parts.push({
-      text: "The SECOND image below is a DESIGN REFERENCE drawing showing the exact visual appearance of the partition to create (panel count, frame proportions, mullion layout, door position, overall style). Copy the partition's APPEARANCE from this second image into the first image at the magenta rectangle location. Ignore any dimension lines, numbers, measurements, text, or annotations in the second image — use only the visual style and layout. Do NOT copy the second image's background, colors, or anything outside the partition itself.",
+      inlineData: { data: drawingABase64, mimeType: drawingAMimeType },
     });
+  }
+  if (drawingBBase64 && drawingBMimeType) {
     parts.push({
-      inlineData: { data: drawingBase64, mimeType: drawingMimeType },
+      inlineData: { data: drawingBBase64, mimeType: drawingBMimeType },
     });
   }
   const result = await ai.models.generateContent({
@@ -128,6 +135,8 @@ export async function POST(req: NextRequest) {
       imageMimeType,
       drawingBase64,
       drawingMimeType,
+      drawingBase64B,
+      drawingMimeTypeB,
       editInstruction,
       count = 4,
     } = body;
@@ -141,8 +150,32 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const isCorner = !!(spec.wallB && placement?.wallB);
+    const hasDrawingA = !!(drawingBase64 && drawingMimeType);
+    const hasDrawingB = !!(drawingBase64B && drawingMimeTypeB);
+    const useDrawingMode = !editInstruction && (hasDrawingA || hasDrawingB);
+
+    if (useDrawingMode && isCorner && !(hasDrawingA && hasDrawingB)) {
+      return withCors(
+        NextResponse.json(
+          { error: "ㄴ 형태는 벽 A, B 도면을 모두 올려야 합니다" },
+          { status: 400 },
+        ),
+      );
+    }
+    if (useDrawingMode && !isCorner && !hasDrawingA) {
+      return withCors(
+        NextResponse.json(
+          { error: "도면 A가 필요합니다" },
+          { status: 400 },
+        ),
+      );
+    }
+
     const ai = getClient();
-    const basePrompt = buildRenderPrompt(spec, placement);
+    const basePrompt = useDrawingMode
+      ? buildDrawingPrompt(spec.frameColor, placement, isCorner)
+      : buildRenderPrompt(spec, placement);
 
     let images: string[] = [];
 
@@ -160,6 +193,8 @@ export async function POST(req: NextRequest) {
           imageMimeType,
           editInstruction ? undefined : drawingBase64,
           editInstruction ? undefined : drawingMimeType,
+          editInstruction ? undefined : drawingBase64B,
+          editInstruction ? undefined : drawingMimeTypeB,
         ),
       );
       const results = await Promise.all(tasks);
