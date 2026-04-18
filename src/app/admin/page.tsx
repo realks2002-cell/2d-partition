@@ -12,6 +12,8 @@ import {
   X,
   Save,
   Search,
+  Receipt,
+  Zap,
 } from "lucide-react";
 import { apiUrl, authHeaders, getUser, clearToken } from "@/lib/api-client";
 
@@ -29,6 +31,9 @@ interface User {
   status: string;
   expired_at: string | null;
   created_at: string;
+  render_quota?: number;
+  plan?: string;
+  total_rendered?: number;
 }
 
 const REGIONS = [
@@ -65,8 +70,6 @@ export default function AdminPage() {
   const [dateTo, setDateTo] = useState("");
   const [regionFilter, setRegionFilter] = useState("");
 
-  const currentUser = getUser();
-
   const fetchUsers = useCallback(async () => {
     const res = await fetch(apiUrl("/api/admin/users"), { headers: authHeaders() });
     if (res.ok) {
@@ -77,7 +80,8 @@ export default function AdminPage() {
   }, []);
 
   useEffect(() => {
-    if (!currentUser || currentUser.role !== "admin") { router.replace("/"); return; }
+    const u = getUser();
+    if (!u || u.role !== "admin") { router.replace("/"); return; }
     fetchUsers();
   }, [fetchUsers, router]);
 
@@ -162,6 +166,21 @@ export default function AdminPage() {
     });
   };
 
+  const adjustQuota = async (id: number, name: string) => {
+    const raw = prompt(`"${name}" 회원의 횟수 조정 (+충전 / -회수)\n예: 30 또는 -5`);
+    if (!raw) return;
+    const delta = Number(raw.trim());
+    if (!Number.isFinite(delta) || delta === 0) { alert("숫자를 입력하세요"); return; }
+    const note = prompt("사유 (선택)") || "";
+    const res = await fetch(apiUrl(`/api/admin/users/${id}/quota`), {
+      method: "POST", headers: authHeaders(), body: JSON.stringify({ delta, note }),
+    });
+    const data = await res.json();
+    if (!res.ok) { alert(data.error || "실패"); return; }
+    alert(`완료. 잔여 ${data.balance}회`);
+    fetchUsers();
+  };
+
   const handleLogout = () => { clearToken(); router.replace("/login"); };
 
   const statusText = (s: string) => {
@@ -195,6 +214,10 @@ export default function AdminPage() {
           <button onClick={() => { setShowAdd(true); setAddForm(EMPTY_FORM); setError(""); }}
             className="inline-flex items-center gap-1 px-2 h-[23px] bg-[var(--ink)] text-[var(--surface)] text-[8px] font-medium rounded-md">
             <Plus size={9} /> 회원 추가
+          </button>
+          <button onClick={() => router.push("/admin/payments")}
+            className="inline-flex items-center gap-1 px-2 h-[23px] border border-[var(--line-2)] text-[8px] font-medium rounded-md hover:bg-[var(--surface-2)]">
+            <Receipt size={9} /> 결제
           </button>
           <button onClick={() => router.push("/admin/push")}
             className="inline-flex items-center gap-1 px-2 h-[23px] border border-[var(--line-2)] text-[8px] font-medium rounded-md hover:bg-[var(--surface-2)]">
@@ -301,6 +324,7 @@ export default function AdminPage() {
               <th className="py-2 px-1.5 font-medium text-left">상호명</th>
               <th className="py-2 px-1.5 font-medium text-left">지역</th>
               <th className="py-2 px-1.5 font-medium">가입일</th>
+              <th className="py-2 px-1.5 font-medium">잔여</th>
               <th className="py-2 px-1.5 font-medium">종료일</th>
               <th className="py-2 px-1.5 font-medium">상태</th>
               <th className="py-2 px-1.5 font-medium">처리</th>
@@ -327,6 +351,7 @@ export default function AdminPage() {
                       </select>
                     </td>
                     <td className="py-1.5 px-1.5 text-center text-[8px] text-[var(--muted)]">{fmtDate(u.created_at)}</td>
+                    <td className="py-1.5 px-1.5 text-center text-[8px] text-[var(--muted)]">{u.render_quota ?? 0}</td>
                     <td className="py-1.5 px-1.5">
                       <input type="date" className={editInputCls} value={editForm.expired_at}
                         onChange={(e) => setEditForm((p) => ({ ...p, expired_at: e.target.value }))} />
@@ -378,11 +403,20 @@ export default function AdminPage() {
                   <td className="py-2.5 px-1.5 text-[var(--muted)]">{u.company || "-"}</td>
                   <td className="py-2.5 px-1.5">{u.region}</td>
                   <td className="py-2.5 px-1.5 text-center text-[8px] text-[var(--muted)]">{fmtDate(u.created_at)}</td>
+                  <td className="py-2.5 px-1.5 text-center font-medium">
+                    <span className={u.render_quota !== undefined && u.render_quota <= 3 ? "text-[var(--danger)]" : ""}>
+                      {u.render_quota ?? 0}
+                    </span>
+                  </td>
                   <td className="py-2.5 px-1.5 text-center text-[8px] text-[var(--muted)]">{u.expired_at ? u.expired_at.slice(0, 10) : "-"}</td>
                   <td className={`py-2.5 px-1.5 text-center font-medium ${statusCls(u.status)}`}>{statusText(u.status)}</td>
                   <td className="py-2.5 px-1.5">
                     {u.role !== "admin" ? (
                       <div className="flex items-center justify-center gap-1.5">
+                        <button onClick={() => adjustQuota(u.id, u.name)}
+                          className="text-[var(--accent)] hover:scale-110 transition-transform" title="횟수 조정">
+                          <Zap size={12} />
+                        </button>
                         <button onClick={() => startEdit(u)}
                           className="text-[var(--muted)] hover:text-[var(--ink)] hover:scale-110 transition-transform" title="편집">
                           <Pencil size={12} />

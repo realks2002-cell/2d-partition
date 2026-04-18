@@ -248,6 +248,14 @@ export const useSession = create<SessionState>()(
         placement: s.placement,
         dimension: s.dimension,
       }),
+      onRehydrateStorage: () => () => {
+        useSessionHydrated = true;
+      },
     },
   ),
 );
+
+let useSessionHydrated = false;
+export function isSessionHydrated() {
+  return useSessionHydrated;
+}

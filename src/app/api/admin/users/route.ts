@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { checkAuth, checkAdmin } from "@/lib/api-guard";
 import { createServerClient } from "@/lib/supabase";
+import { grantQuota, SIGNUP_BONUS } from "@/lib/quota";
 
 export async function GET(req: NextRequest) {
   const auth = await checkAuth(req);
@@ -64,6 +65,12 @@ export async function POST(req: NextRequest) {
         );
       }
       return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    try {
+      await grantQuota(data.id, SIGNUP_BONUS, "signup_bonus", { by: "admin" });
+    } catch (e) {
+      console.error("[admin.users.create] grant bonus failed", e);
     }
 
     return NextResponse.json({ ok: true, user: data }, { status: 201 });

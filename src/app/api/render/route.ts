@@ -8,6 +8,12 @@ import {
   type PartitionPlacement,
 } from "@/lib/prompt-builder";
 import { checkAuth, checkRateLimit } from "@/lib/api-guard";
+import {
+  consumeQuota,
+  grantQuota,
+  InsufficientQuotaError,
+  getQuota,
+} from "@/lib/quota";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -125,6 +131,9 @@ export async function POST(req: NextRequest) {
   if (auth instanceof NextResponse) return withCors(auth);
   const rateErr = checkRateLimit(req);
   if (rateErr) return withCors(rateErr);
+
+  let consumedAmount = 0;
+  let consumedMode: Mode | undefined;
   try {
     const body = (await req.json()) as RenderRequest;
     const {
@@ -172,6 +181,33 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const toConsume = Math.max(1, count);
+    let quotaAfter: number;
+    try {
+      quotaAfter = await consumeQuota(auth.userId, toConsume, {
+        mode,
+        count: toConsume,
+      });
+      consumedAmount = toConsume;
+      consumedMode = mode;
+    } catch (e) {
+      if (e instanceof InsufficientQuotaError) {
+        const remaining = await getQuota(auth.userId);
+        return withCors(
+          NextResponse.json(
+            {
+              error: "렌더링 횟수가 부족합니다",
+              code: "insufficient_quota",
+              remaining,
+              required: toConsume,
+            },
+            { status: 402 },
+          ),
+        );
+      }
+      throw e;
+    }
+
     const ai = getClient();
     const basePrompt = useDrawingMode
       ? buildDrawingPrompt(spec.frameColor, placement, isCorner)
@@ -213,15 +249,46 @@ export async function POST(req: NextRequest) {
       images = refined.flat().length > 0 ? refined.flat() : initial;
     }
 
+    if (images.length === 0) {
+      try {
+        quotaAfter = await grantQuota(auth.userId, toConsume, "refund", {
+          reason: "no_images_generated",
+          mode,
+        });
+        consumedAmount = 0;
+      } catch (e) {
+        console.error("[/api/render] refund failed", e);
+      }
+      return withCors(
+        NextResponse.json(
+          { error: "이미지 생성에 실패했습니다. 횟수는 자동 환불됩니다.", remaining: quotaAfter },
+          { status: 502 },
+        ),
+      );
+    }
+
+    consumedAmount = 0;
+
     return withCors(
       NextResponse.json({
         mode,
         prompt: basePrompt,
         images: images.map((b64) => `data:image/png;base64,${b64}`),
+        remaining: quotaAfter,
       }),
     );
   } catch (err) {
     console.error("[/api/render] error", err);
+    if (consumedAmount > 0) {
+      try {
+        await grantQuota(auth.userId, consumedAmount, "refund", {
+          reason: "server_error",
+          mode: consumedMode,
+        });
+      } catch (refundErr) {
+        console.error("[/api/render] refund on error failed", refundErr);
+      }
+    }
     const message = err instanceof Error ? err.message : "Unknown error";
     return withCors(NextResponse.json({ error: message }, { status: 500 }));
   }

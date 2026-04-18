@@ -1,6 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import AuthGuard from "@/components/AuthGuard";
+import { Geist } from "next/font/google";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
   title: "칸막이Go 시뮬레이터",
@@ -27,7 +30,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko" className="h-full antialiased">
+    <html lang="ko" className={cn("h-full antialiased", "font-sans", geist.variable)}>
       <head>
         <link
           rel="stylesheet"
@@ -35,7 +38,7 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col bg-[var(--bg)] text-[var(--ink)]">
-        <AuthGuard>{children}</AuthGuard>
+        {children}
       </body>
     </html>
   );

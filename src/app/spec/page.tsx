@@ -8,6 +8,7 @@ import { useHydrateImages } from "@/lib/use-hydrate-images";
 import { apiUrl, authHeaders } from "@/lib/api-client";
 import { burnPlacementOntoImage, resizeImageFile } from "@/lib/image";
 import { PlacementCanvas } from "@/components/placement-canvas";
+import QuotaExhaustedModal from "@/components/QuotaExhaustedModal";
 import {
   wallTotalWidthMm,
   type FrameColor,
@@ -54,6 +55,7 @@ export default function SpecPage() {
   } = useSession();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [quotaModal, setQuotaModal] = useState<{ open: boolean; remaining?: number; required?: number }>({ open: false });
   const drawingFileRef = useRef<HTMLInputElement>(null);
   const drawingFileRefB = useRef<HTMLInputElement>(null);
 
@@ -189,8 +191,15 @@ export default function SpecPage() {
         }),
       });
       const json = await res.json();
+      if (res.status === 402 && json.code === "insufficient_quota") {
+        setQuotaModal({ open: true, remaining: json.remaining, required: json.required });
+        return;
+      }
       if (!res.ok) throw new Error(json.error || "렌더링 실패");
       setRenderings(json.images);
+      if (typeof json.remaining === "number") {
+        window.dispatchEvent(new Event("quota-changed"));
+      }
       router.push("/result");
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -293,19 +302,38 @@ export default function SpecPage() {
               value={spec.siteHeightMm}
               onChange={(v) => setSpec({ siteHeightMm: v })}
             />
-            <div className="grid grid-cols-2 gap-3">
-              <NumField
-                label="벽 A (왼쪽) 폭"
-                unit="mm"
-                value={spec.siteWidthMm}
-                onChange={setSiteWidthA}
-              />
-              <NumField
-                label="벽 B (오른쪽) 폭"
-                unit="mm"
-                value={wallB?.siteWidthMm ?? 0}
-                onChange={setSiteWidthB}
-              />
+            <div className="grid grid-cols-[1fr_1px_1fr] gap-4">
+              <div className="space-y-3">
+                <NumField
+                  label="벽 A (왼쪽) 폭"
+                  unit="mm"
+                  value={spec.siteWidthMm}
+                  onChange={setSiteWidthA}
+                />
+                <WallPanelBlock
+                  label="벽 A (왼쪽)"
+                  panelCount={spec.panelCount}
+                  panelWidthMm={spec.panelWidthMm}
+                  onChange={setPanelCountA}
+                />
+              </div>
+              <div className="bg-[var(--line)]" />
+              <div className="space-y-3">
+                <NumField
+                  label="벽 B (오른쪽) 폭"
+                  unit="mm"
+                  value={wallB?.siteWidthMm ?? 0}
+                  onChange={setSiteWidthB}
+                />
+                {wallB && (
+                  <WallPanelBlock
+                    label="벽 B (오른쪽)"
+                    panelCount={wallB.panelCount}
+                    panelWidthMm={wallB.panelWidthMm}
+                    onChange={setPanelCountB}
+                  />
+                )}
+              </div>
             </div>
           </div>
         ) : (
@@ -330,28 +358,7 @@ export default function SpecPage() {
       {/* 02 — Panel composition */}
       {!hasDrawing && (
       <Section idx="02" title="Panel Configuration">
-        {isCorner && wallB ? (
-          <div className="space-y-4">
-            <WallPanelBlock
-              label="벽 A (왼쪽)"
-              panelCount={spec.panelCount}
-              panelWidthMm={spec.panelWidthMm}
-              onChange={setPanelCountA}
-            />
-            <WallPanelBlock
-              label="벽 B (오른쪽)"
-              panelCount={wallB.panelCount}
-              panelWidthMm={wallB.panelWidthMm}
-              onChange={setPanelCountB}
-            />
-            <NumField
-              label="칸막이 높이 (공유)"
-              unit="mm · H"
-              value={spec.heightMm}
-              onChange={(v) => setSpec({ heightMm: v })}
-            />
-          </div>
-        ) : (
+        {isCorner ? null : (
           <>
             <div className="mb-3 bg-[var(--surface-2)] rounded-2xl p-4">
               <div className="flex items-center justify-between">
@@ -378,19 +385,13 @@ export default function SpecPage() {
                 </div>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3 mt-3">
+            <div className="mt-3">
               <NumField
                 label="Panel Width"
                 unit="mm"
                 value={spec.panelWidthMm}
                 onChange={(v) => setSpec({ panelWidthMm: v })}
               />
-              <NumField
-              label="Panel Height"
-              unit="mm"
-              value={spec.heightMm}
-              onChange={(v) => setSpec({ heightMm: v })}
-            />
             </div>
           </>
         )}
@@ -563,6 +564,12 @@ export default function SpecPage() {
           </button>
         </div>
       </div>
+      <QuotaExhaustedModal
+        open={quotaModal.open}
+        onClose={() => setQuotaModal({ open: false })}
+        remaining={quotaModal.remaining}
+        required={quotaModal.required}
+      />
     </main>
   );
 }
@@ -686,9 +693,9 @@ function WallPanelBlock({
         <span className="unit">panels</span>
       </div>
       <div className="flex items-center justify-between">
-        <div className="counter">
-          <button onClick={() => onChange(panelCount - 1)} aria-label="감소">
-            <Minus size={18} />
+        <div className="flex items-center gap-2">
+          <button onClick={() => onChange(panelCount - 1)} className="counter" style={{ width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", padding: 0 }} aria-label="감소">
+            <Minus size={16} />
           </button>
           <input
             type="number"
@@ -700,10 +707,11 @@ function WallPanelBlock({
               const n = Number(e.target.value);
               if (!Number.isNaN(n)) onChange(n);
             }}
-            className="counter-input"
+            className="num-input"
+            style={{ width: 52, textAlign: "center", borderRadius: 8 }}
           />
-          <button onClick={() => onChange(panelCount + 1)} aria-label="증가">
-            <Plus size={18} />
+          <button onClick={() => onChange(panelCount + 1)} className="counter" style={{ width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", padding: 0 }} aria-label="증가">
+            <Plus size={16} />
           </button>
         </div>
         <div className="text-right">

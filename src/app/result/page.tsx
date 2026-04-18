@@ -8,6 +8,7 @@ import { useHydrateImages } from "@/lib/use-hydrate-images";
 import { apiUrl, authHeaders } from "@/lib/api-client";
 import { burnPlacementOntoImage } from "@/lib/image";
 import { ArrowRight, ArrowLeft, Loader2, RotateCw, RefreshCw, Check, Home } from "lucide-react";
+import QuotaExhaustedModal from "@/components/QuotaExhaustedModal";
 
 export default function ResultPage() {
   useHydrateImages();
@@ -34,7 +35,7 @@ export default function ResultPage() {
   const [instruction, setInstruction] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
+  const [quotaModal, setQuotaModal] = useState<{ open: boolean; remaining?: number; required?: number }>({ open: false });
   if (!renderings.length) {
     return (
       <main className="p-6 max-w-md mx-auto pt-safe">
@@ -87,8 +88,13 @@ export default function ResultPage() {
         }),
       });
       const json = await res.json();
+      if (res.status === 402 && json.code === "insufficient_quota") {
+        setQuotaModal({ open: true, remaining: json.remaining, required: json.required });
+        return;
+      }
       if (!res.ok) throw new Error(json.error || "렌더링 실패");
       setRenderings(json.images);
+      if (typeof json.remaining === "number") window.dispatchEvent(new Event("quota-changed"));
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -115,9 +121,14 @@ export default function ResultPage() {
         }),
       });
       const json = await res.json();
+      if (res.status === 402 && json.code === "insufficient_quota") {
+        setQuotaModal({ open: true, remaining: json.remaining, required: json.required });
+        return;
+      }
       if (!res.ok) throw new Error(json.error || "재생성 실패");
       setRenderings(json.images);
       setInstruction("");
+      if (typeof json.remaining === "number") window.dispatchEvent(new Event("quota-changed"));
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -257,6 +268,12 @@ export default function ResultPage() {
           </div>
         </div>
       </div>
+      <QuotaExhaustedModal
+        open={quotaModal.open}
+        onClose={() => setQuotaModal({ open: false })}
+        remaining={quotaModal.remaining}
+        required={quotaModal.required}
+      />
     </main>
   );
 }
