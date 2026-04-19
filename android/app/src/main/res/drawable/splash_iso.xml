@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- ISOPLAN ink background -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#171717" />
+        </shape>
+    </item>
+
+    <!-- Magenta isometric cube, centered -->
+    <item
+        android:gravity="center"
+        android:width="120dp"
+        android:height="120dp">
+        <vector
+            android:width="120dp"
+            android:height="120dp"
+            android:viewportWidth="120"
+            android:viewportHeight="120">
+
+            <group
+                android:translateX="60"
+                android:translateY="60"
+                android:scaleX="0.55"
+                android:scaleY="0.55">
+
+                <!-- top -->
+                <path
+                    android:fillColor="#d43e76"
+                    android:pathData="M0,-60 L52,-30 L0,0 L-52,-30 Z" />
+                <!-- right -->
+                <path
+                    android:fillColor="#b93366"
+                    android:pathData="M0,0 L52,-30 L52,30 L0,60 Z" />
+                <!-- left -->
+                <path
+                    android:fillColor="#8a2649"
+                    android:pathData="M0,0 L-52,-30 L-52,30 L0,60 Z" />
+                <!-- edge highlights -->
+                <path
+                    android:strokeColor="#ffffff"
+                    android:strokeWidth="1.8"
+                    android:pathData="M0,0 L0,60 M0,0 L52,-30 M0,0 L-52,-30"
+                    android:fillColor="#00000000" />
+            </group>
+        </vector>
+    </item>
+
+</layer-list>

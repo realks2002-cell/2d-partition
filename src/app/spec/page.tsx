@@ -9,6 +9,7 @@ import { apiUrl, authHeaders } from "@/lib/api-client";
 import { burnPlacementOntoImage, resizeImageFile } from "@/lib/image";
 import { PlacementCanvas } from "@/components/placement-canvas";
 import QuotaExhaustedModal from "@/components/QuotaExhaustedModal";
+import SiteHeader from "@/components/SiteHeader";
 import {
   wallTotalWidthMm,
   type FrameColor,
@@ -209,33 +210,53 @@ export default function SpecPage() {
   };
 
   return (
-    <main className="spec-compact min-h-[100dvh] mx-auto px-5 pt-safe pb-32" style={{ width: 605, maxWidth: "100%" }}>
-      {/* Top bar */}
-      <div className="flex items-center justify-between pt-4 pb-1">
-        <Link href="/capture?kind=photo" className="btn-icon" aria-label="뒤로">
-          <ArrowLeft size={18} />
-        </Link>
-        <div className="flex items-center gap-2">
-          {isCorner && <div className="chip-soft">ㄴ 형태</div>}
-        </div>
-        <button
-          onClick={() => {
-            if (!confirm("처음부터 다시 시작하시겠습니까? 입력 내용이 모두 초기화됩니다.")) return;
-            reset();
-            router.push("/");
-          }}
-          className="btn-icon"
-          style={{ color: "#ffffff", backgroundColor: "#7f1d1d", borderColor: "#7f1d1d", width: 25, height: 25 }}
-          aria-label="처음부터 다시"
-        >
-          <Home size={14} />
-        </button>
-      </div>
+    <main className="spec-compact min-h-[100dvh] bg-neutral-50 text-neutral-900 pb-32">
+      <SiteHeader />
 
-      <header className="mb-6">
-        <div className="text-[10px] font-medium tracking-[0.14em] uppercase text-[var(--muted)] mb-1">Specification</div>
-        <h1 className="display-tight text-[20px]">스펙 설정</h1>
-      </header>
+      <div className="mx-auto px-6" style={{ maxWidth: 1024 }}>
+        {/* Page sub-header: breadcrumb + actions */}
+        <div className="flex items-center justify-between py-4 border-b border-neutral-200">
+          <div className="flex items-center gap-3">
+            <Link
+              href="/capture?kind=photo"
+              className="inline-flex items-center gap-1.5 text-neutral-700 hover:text-[#d43e76] text-[12px] font-semibold"
+            >
+              <ArrowLeft size={14} />
+              뒤로
+            </Link>
+            <span className="text-neutral-300">/</span>
+            <span className="iso-eyebrow">STEP 02 · SPECIFICATION</span>
+          </div>
+          <button
+            onClick={() => {
+              if (!confirm("처음부터 다시 시작하시겠습니까? 입력 내용이 모두 초기화됩니다.")) return;
+              reset();
+              router.push("/");
+            }}
+            className="inline-flex items-center gap-1 px-2.5 h-8 border border-red-200 text-red-700 hover:bg-red-50 hover:border-red-400 text-[11px] font-bold uppercase tracking-[0.05em] rounded-md transition-colors"
+            aria-label="처음부터 다시"
+          >
+            <Home size={12} />
+            Reset
+          </button>
+        </div>
+
+        <header className="pt-10 pb-6 flex items-end justify-between flex-wrap gap-4">
+          <div className="max-w-2xl">
+            <h1 className="iso-h1 text-[29px] leading-[1.1] mb-2">
+              파티션 스펙 설정
+            </h1>
+            <p className="text-[13px] text-neutral-600 leading-[1.55]">
+              현장 치수와 칸 구성을 입력하면 AI가 실제 시공 후 모습으로 렌더링합니다.
+            </p>
+          </div>
+          {isCorner && (
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-neutral-900 text-white text-[11px] font-bold uppercase tracking-[0.1em] rounded-full">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#d43e76]" />
+              ㄴ CORNER MODE
+            </div>
+          )}
+        </header>
 
       {/* REF — Drawing reference */}
       <Section
@@ -527,36 +548,32 @@ export default function SpecPage() {
       </Section>
 
       {error && (
-        <div
-          className="mt-5 p-4 rounded-[var(--radius-md)] text-[13px]"
-          style={{
-            background: "var(--accent-tint)",
-            color: "var(--accent)",
-          }}
-        >
+        <div className="mt-5 px-4 py-3 bg-red-50 border border-red-200 text-red-700 text-[12px] rounded-lg">
           {error}
         </div>
       )}
+      </div>
 
-      <div className="action-bar">
-        <div className="inner">
+      {/* Bottom action bar */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-neutral-900 pb-safe">
+        <div className="mx-auto px-6 py-3" style={{ maxWidth: 1024 }}>
           <button
             onClick={render}
             disabled={busy}
-            className="btn btn-primary w-full justify-between px-6"
-            style={{ borderRadius: "var(--radius-xl)" }}
+            className="group w-full h-14 bg-neutral-900 hover:bg-[#d43e76] disabled:opacity-60 disabled:hover:bg-neutral-900 text-white rounded-xl px-5 flex items-center justify-between transition-colors"
           >
             {busy ? (
-              <>
-                <span className="flex items-center gap-2">
-                  <Loader2 className="animate-spin" size={16} />
-                  렌더링 중 · 30~60초
-                </span>
-              </>
+              <span className="flex items-center gap-2 text-[14px] font-bold">
+                <Loader2 className="animate-spin" size={16} />
+                렌더링 중 · 30~60초
+              </span>
             ) : (
               <>
-                <span className="text-[14px] font-semibold">렌더링 생성</span>
-                <span className="flex items-center gap-1 text-[10px] tracking-[0.08em] uppercase opacity-60">
+                <div className="text-left">
+                  <div className="iso-eyebrow-muted" style={{ color: "rgba(255,255,255,0.5)" }}>GENERATE</div>
+                  <div className="text-[15px] font-bold tracking-tight mt-0.5">렌더링 생성</div>
+                </div>
+                <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.1em] opacity-70 group-hover:opacity-100">
                   Proceed <ArrowRight size={14} />
                 </span>
               </>
@@ -564,6 +581,7 @@ export default function SpecPage() {
           </button>
         </div>
       </div>
+
       <QuotaExhaustedModal
         open={quotaModal.open}
         onClose={() => setQuotaModal({ open: false })}
@@ -587,24 +605,24 @@ function DrawingSlot({
 }) {
   if (image) {
     return (
-      <div className="relative surface overflow-hidden">
+      <div className="relative bg-neutral-50 border border-neutral-200 rounded-xl overflow-hidden">
         {label && (
-          <div className="absolute top-1 left-2 text-[9px] font-medium text-[var(--ink)] bg-[var(--surface)]/80 px-1 rounded">
+          <div className="absolute top-2 left-2 z-10 px-2 py-0.5 bg-white/95 backdrop-blur text-[10px] font-bold text-neutral-900 rounded-md shadow-sm">
             {label}
           </div>
         )}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={image}
           alt=""
-          className="w-full max-h-14 object-contain bg-[var(--surface-2)]"
+          className="w-full max-h-32 object-contain bg-neutral-50"
         />
         <button
           onClick={onClear}
-          className="absolute top-1 right-1 btn-icon"
-          style={{ width: 24, height: 24 }}
+          className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white border border-neutral-300 hover:border-red-400 hover:text-red-600 flex items-center justify-center shadow-sm transition-colors"
           aria-label="도면 제거"
         >
-          <X size={11} />
+          <X size={12} />
         </button>
       </div>
     );
@@ -612,12 +630,15 @@ function DrawingSlot({
   return (
     <button
       onClick={onPick}
-      className="w-full py-5 rounded-2xl bg-[var(--surface-2)] flex flex-col items-center gap-1.5 transition-colors active:bg-[var(--surface-3)]"
+      className="w-full py-8 rounded-xl border-2 border-dashed border-neutral-300 bg-neutral-50 hover:border-neutral-900 hover:bg-white flex flex-col items-center gap-2 transition-colors group"
     >
-      <Upload size={16} className="text-[var(--ink-3)]" />
-      <span className="text-[11px] font-medium text-[var(--ink)]">
-        {label ?? "참고 도면 업로드 (선택)"}
+      <div className="w-10 h-10 rounded-full bg-white border border-neutral-300 group-hover:border-neutral-900 group-hover:bg-neutral-900 group-hover:text-white flex items-center justify-center transition-colors">
+        <Upload size={16} strokeWidth={2} />
+      </div>
+      <span className="text-[12px] font-bold text-neutral-900">
+        {label ?? "도면 업로드"}
       </span>
+      <span className="text-[10px] text-neutral-500">PNG · JPG · 최대 10MB</span>
     </button>
   );
 }
@@ -634,12 +655,21 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="mb-6">
-      <div className="mb-3">
-        <div className="text-[9px] font-medium tracking-[0.1em] uppercase text-[var(--muted)]">
-          Section {idx} — {title}
-          {tag && <span className="normal-case tracking-normal ml-1.5 text-[var(--muted)]">({tag})</span>}
+    <section className="mb-6 bg-white border border-neutral-200 rounded-2xl p-5">
+      <div className="flex items-center justify-between pb-3 mb-4 border-b border-neutral-200">
+        <div className="flex items-baseline gap-2.5">
+          <span className="text-[10px] font-bold tracking-[0.2em] text-[#d43e76]">
+            {idx}
+          </span>
+          <span className="text-[14px] font-bold text-neutral-900 tracking-tight">
+            {title}
+          </span>
         </div>
+        {tag && (
+          <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-neutral-500">
+            {tag}
+          </span>
+        )}
       </div>
       {children}
     </section>

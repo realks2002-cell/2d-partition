@@ -18,7 +18,7 @@ export default function PushPage() {
   useEffect(() => {
     const user = getUser();
     if (!user || user.role !== "admin") {
-      router.replace("/");
+      router.replace("/admin/login");
     }
   }, [router]);
 

@@ -42,32 +42,32 @@ export default function UserStatus() {
       <div className="flex items-center gap-2">
         <button
           onClick={() => router.push("/pricing")}
-          className="inline-flex items-center gap-1 px-2 h-[24px] rounded-md border border-[var(--line-2)] hover:bg-[var(--surface-2)] text-[10px] font-medium"
+          className={`inline-flex items-center gap-1.5 px-2.5 h-[26px] rounded-full border text-[11px] font-semibold transition-colors ${
+            low
+              ? "border-red-300 bg-red-50 text-red-700 hover:bg-red-100"
+              : "border-neutral-300 bg-white text-neutral-900 hover:border-neutral-900 hover:text-[#d43e76]"
+          }`}
           title="렌더링 횟수"
         >
-          <Zap size={11} className={low ? "text-[var(--danger)]" : "text-[var(--accent)]"} />
-          <span className={low ? "text-[var(--danger)]" : ""}>
-            {quota === null ? "…" : `${quota}회`}
-          </span>
+          <Zap size={11} className={low ? "text-red-500" : "text-[#d43e76]"} strokeWidth={2.5} />
+          <span>{quota === null ? "…" : `${quota}회`}</span>
         </button>
-        <span className="text-[11px] text-[var(--ink-3)]">{state.user.name}</span>
+        <span className="text-[12px] text-neutral-600 font-medium">{state.user.name}</span>
         {state.user.role === "admin" && (
           <button
             onClick={() => router.push("/admin")}
-            className="btn-icon"
-            style={{ width: 28, height: 28 }}
+            className="w-7 h-7 rounded-full border border-neutral-300 hover:border-neutral-900 hover:text-[#d43e76] flex items-center justify-center transition-colors"
             title="관리자"
           >
-            <Shield size={13} />
+            <Shield size={12} />
           </button>
         )}
         <button
           onClick={() => { clearToken(); router.push("/login"); }}
-          className="btn-icon"
-          style={{ width: 28, height: 28 }}
+          className="w-7 h-7 rounded-full border border-neutral-300 hover:border-neutral-900 hover:text-[#d43e76] flex items-center justify-center transition-colors"
           title="로그아웃"
         >
-          <LogOut size={13} />
+          <LogOut size={12} />
         </button>
       </div>
     );
@@ -76,7 +76,7 @@ export default function UserStatus() {
   return (
     <button
       onClick={() => router.push("/login")}
-      className="text-[11px] text-[var(--accent)] font-medium underline underline-offset-2"
+      className="text-[12px] font-bold uppercase tracking-[0.05em] text-neutral-900 hover:text-[#d43e76]"
     >
       로그인
     </button>

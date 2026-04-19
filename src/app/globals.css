@@ -1,8 +1,4 @@
 @import "tailwindcss";
-@import "tw-animate-css";
-@import "shadcn/tailwind.css";
-
-@custom-variant dark (&:is(.dark *));
 
 /* =========================================================
    칸막이Go — Refined Atelier theme (commercial grade)
@@ -19,7 +15,7 @@
   --ink: #0e0e0d;
   --ink-2: #2a2926;
   --ink-3: #4e4c46;
-  --muted: oklch(0.97 0 0);
+  --muted: #8a8880;
   --muted-2: #b8b5ac;
 
   /* Lines */
@@ -27,7 +23,7 @@
   --line-2: #dcd9cf;
 
   /* Brand accent — deep terracotta */
-  --accent: oklch(0.97 0 0);
+  --accent: #9b2f1a;
   --accent-hover: #7f2614;
   --accent-tint: rgba(155, 47, 26, 0.08);
 
@@ -54,66 +50,8 @@
   --ease-in: cubic-bezier(0.55, 0.06, 0.68, 0.19);
 
   /* Semantic */
-
-  --background: oklch(1 0 0);
-
-  --foreground: oklch(0.145 0 0);
-
-  --card: oklch(1 0 0);
-
-  --card-foreground: oklch(0.145 0 0);
-
-  --popover: oklch(1 0 0);
-
-  --popover-foreground: oklch(0.145 0 0);
-
-  --primary: oklch(0.205 0 0);
-
-  --primary-foreground: oklch(0.985 0 0);
-
-  --secondary: oklch(0.97 0 0);
-
-  --secondary-foreground: oklch(0.205 0 0);
-
-  --muted-foreground: oklch(0.556 0 0);
-
-  --accent-foreground: oklch(0.205 0 0);
-
-  --destructive: oklch(0.577 0.245 27.325);
-
-  --border: oklch(0.922 0 0);
-
-  --input: oklch(0.922 0 0);
-
-  --ring: oklch(0.708 0 0);
-
-  --chart-1: oklch(0.87 0 0);
-
-  --chart-2: oklch(0.556 0 0);
-
-  --chart-3: oklch(0.439 0 0);
-
-  --chart-4: oklch(0.371 0 0);
-
-  --chart-5: oklch(0.269 0 0);
-
-  --radius: 0.625rem;
-
-  --sidebar: oklch(0.985 0 0);
-
-  --sidebar-foreground: oklch(0.145 0 0);
-
-  --sidebar-primary: oklch(0.205 0 0);
-
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-
-  --sidebar-accent: oklch(0.97 0 0);
-
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-
-  --sidebar-border: oklch(0.922 0 0);
-
-  --sidebar-ring: oklch(0.708 0 0);
+  --background: var(--bg);
+  --foreground: var(--ink);
 }
 
 @theme inline {
@@ -124,43 +62,8 @@
   --color-accent: var(--accent);
   --color-line: var(--line);
   --font-display: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
-  --font-sans: var(--font-sans);
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
   --font-mono: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
-  --font-heading: var(--font-sans);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
 * {
@@ -855,48 +758,134 @@ a:focus-visible {
   font-size: 13px;
 }
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+/* =========================================================
+   ISOPLAN 3D — Design System tokens (additive, namespaced)
+   기존 --accent/--ink/--surface 토큰과 충돌하지 않도록
+   --brand-*, --neutral-*, --fg*, --bg* prefix 사용.
+   ========================================================= */
+:root {
+  /* Brand */
+  --brand-accent: #d43e76;
+  --brand-accent-hover: #b93366;
+  --brand-ink: #171717;
+  --brand-paper: #ffffff;
+
+  /* Neutrals */
+  --neutral-50:  #fafafa;
+  --neutral-100: #f5f5f5;
+  --neutral-200: #e5e5e5;
+  --neutral-300: #d4d4d4;
+  --neutral-400: #a3a3a3;
+  --neutral-500: #737373;
+  --neutral-600: #525252;
+  --neutral-700: #404040;
+  --neutral-800: #262626;
+  --neutral-900: #171717;
+
+  /* Semantic foreground / background (ISOPLAN-only pages) */
+  --iso-fg1: var(--neutral-900);
+  --iso-fg2: var(--neutral-700);
+  --iso-fg3: var(--neutral-500);
+  --iso-fg4: var(--neutral-400);
+  --iso-bg1: var(--brand-paper);
+  --iso-bg2: var(--neutral-50);
+  --iso-bg3: var(--neutral-100);
+  --iso-bg-ink: var(--neutral-900);
+  --iso-border-hair: var(--neutral-200);
+  --iso-border-default: var(--neutral-300);
+  --iso-border-strong: var(--neutral-900);
+
+  /* Status */
+  --iso-success-50: #ecfdf5;
+  --iso-success-500: #10b981;
+  --iso-success-700: #047857;
+  --iso-danger-50: #fef2f2;
+  --iso-danger-500: #ef4444;
+  --iso-info-500: #2563eb;
+
+  /* shadcn token mapping (ISOPLAN palette) */
+  --background: var(--iso-bg2);
+  --foreground: var(--iso-fg1);
+  --card: var(--iso-bg1);
+  --card-foreground: var(--iso-fg1);
+  --popover: var(--iso-bg1);
+  --popover-foreground: var(--iso-fg1);
+  --primary: var(--brand-ink);
+  --primary-foreground: var(--brand-paper);
+  --secondary: var(--iso-bg3);
+  --secondary-foreground: var(--iso-fg1);
+  --muted-foreground: var(--iso-fg3);
+  --accent-foreground: var(--brand-paper);
+  --destructive: var(--iso-danger-500);
+  --destructive-foreground: var(--brand-paper);
+  --border: var(--iso-border-hair);
+  --input: var(--iso-border-default);
+  --ring: var(--brand-ink);
+  --radius: 12px;
 }
 
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
-  html {
-    @apply font-sans;
-  }
+/* Pretendard 적용 (전체) */
+html, body {
+  font-family: 'Pretendard Variable', Pretendard, ui-sans-serif, system-ui,
+               -apple-system, 'Segoe UI', 'Helvetica Neue', Arial,
+               'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+}
+
+/* ISOPLAN typography utilities (.iso- prefix to avoid collision) */
+.iso-display {
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+.iso-h1 {
+  font-size: 29px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+}
+.iso-h2 {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+}
+.iso-h3 {
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+.iso-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--brand-accent);
+}
+.iso-eyebrow-muted {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--iso-fg4);
+}
+.iso-body {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--iso-fg2);
+}
+.iso-caption {
+  font-size: 12px;
+  color: var(--iso-fg3);
+}
+.iso-cta {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Section divider — thick black rule (signature pattern) */
+.iso-rule {
+  border-bottom: 1px solid var(--neutral-900);
+  padding-bottom: 16px;
 }

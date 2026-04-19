@@ -2,7 +2,7 @@ import type { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
   appId: "com.bizstart.hwadam",
-  appName: "화담",
+  appName: "칸막이Go",
   webDir: "out",
   server: {
     androidScheme: "https",
@@ -17,6 +17,9 @@ const config: CapacitorConfig = {
     StatusBar: {
       style: "DEFAULT",
       backgroundColor: "#fafaf7",
+    },
+    Browser: {
+      presentationStyle: "fullscreen",
     },
   },
 };

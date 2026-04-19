@@ -2,6 +2,8 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import SiteHeader from "@/components/SiteHeader";
 
 export default function PaymentFailPage() {
   const router = useRouter();
@@ -10,24 +12,33 @@ export default function PaymentFailPage() {
   const message = sp.get("message") ?? "결제가 취소되었거나 실패했습니다";
 
   return (
-    <main className="min-h-[100dvh] flex items-center justify-center px-5 pt-safe pb-safe">
-      <div className="w-full max-w-sm bg-[var(--surface)] border border-[var(--line)] rounded-xl p-6 text-center">
-        <AlertCircle size={36} className="mx-auto mb-3 text-[var(--danger)]" />
-        <div className="text-[14px] font-semibold mb-1">결제 실패</div>
-        <div className="text-[10px] text-[var(--muted)] mb-1">{message}</div>
-        {code && <div className="text-[9px] mono text-[var(--muted)] mb-4">[{code}]</div>}
-        <button
-          onClick={() => router.push("/pricing")}
-          className="w-full h-[34px] bg-[var(--ink)] text-[var(--surface)] rounded-lg text-[11px] font-medium"
-        >
-          다시 시도
-        </button>
-        <button
-          onClick={() => router.push("/")}
-          className="w-full h-[30px] mt-2 text-[10px] text-[var(--muted)] hover:text-[var(--ink)]"
-        >
-          홈으로
-        </button>
+    <main className="min-h-[100dvh] bg-neutral-50 flex flex-col">
+      <SiteHeader />
+      <div className="flex-1 flex items-center justify-center px-6 py-16">
+      <div className="w-full max-w-md bg-white rounded-2xl border border-neutral-200 p-6 text-center">
+        <div className="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4">
+          <AlertCircle size={28} className="text-red-500" strokeWidth={2} />
+        </div>
+        <div className="iso-eyebrow-muted mb-3">FAILED · CANCELLED</div>
+        <h1 className="iso-display text-[24px] mb-2">결제 실패</h1>
+        <p className="text-[13px] text-neutral-600 mb-1">{message}</p>
+        {code && <div className="text-[11px] mono text-neutral-400 mb-6">[{code}]</div>}
+
+        <div className="space-y-2 pt-4 mt-4 border-t border-neutral-900">
+          <Button
+            onClick={() => router.push("/pricing")}
+            className="w-full h-11 bg-neutral-900 hover:bg-[#d43e76] text-white text-[12px] font-bold uppercase tracking-[0.05em] rounded-lg"
+          >
+            다시 시도
+          </Button>
+          <button
+            onClick={() => router.push("/")}
+            className="w-full h-9 text-[12px] text-neutral-500 hover:text-[#d43e76]"
+          >
+            홈으로
+          </button>
+        </div>
+      </div>
       </div>
     </main>
   );

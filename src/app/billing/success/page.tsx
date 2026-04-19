@@ -2,8 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { CheckCircle2, Loader2, AlertCircle } from "lucide-react";
+import { CheckCircle2, Loader2, AlertCircle, ExternalLink, Smartphone } from "lucide-react";
 import { apiUrl, authHeaders } from "@/lib/api-client";
+import { Button } from "@/components/ui/button";
+import SiteHeader from "@/components/SiteHeader";
+
+const DEEP_LINK_SUCCESS = "kanmakigo://payment/success";
 
 export default function PaymentSuccessPage() {
   const router = useRouter();
@@ -11,6 +15,7 @@ export default function PaymentSuccessPage() {
   const [status, setStatus] = useState<"confirming" | "ok" | "error">("confirming");
   const [message, setMessage] = useState<string>("결제 승인 중…");
   const [result, setResult] = useState<{ quota_granted: number; balance: number; receipt_url?: string } | null>(null);
+  const fromApp = sp.get("from") === "app";
 
   useEffect(() => {
     const paymentKey = sp.get("paymentKey");
@@ -41,60 +46,130 @@ export default function PaymentSuccessPage() {
     })();
   }, [sp]);
 
+  const [returning, setReturning] = useState(false);
+  const [returnError, setReturnError] = useState<string | null>(null);
+
+  const returnToApp = async () => {
+    if (returning) return;
+    setReturning(true);
+    setReturnError(null);
+    try {
+      const res = await fetch(apiUrl("/api/auth/app-handoff"), {
+        method: "POST",
+        headers: authHeaders(),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.code) {
+        throw new Error(data.error || "복귀 코드 발급 실패");
+      }
+      window.location.href = `${DEEP_LINK_SUCCESS}?code=${encodeURIComponent(data.code)}`;
+    } catch (e) {
+      setReturnError(e instanceof Error ? e.message : String(e));
+      setReturning(false);
+    }
+  };
+
   return (
-    <main className="min-h-[100dvh] flex items-center justify-center px-5 pt-safe pb-safe">
-      <div className="w-full max-w-sm bg-[var(--surface)] border border-[var(--line)] rounded-xl p-6 text-center">
+    <main className="min-h-[100dvh] bg-neutral-50 flex flex-col">
+      <SiteHeader />
+      <div className="flex-1 flex items-center justify-center px-6 py-16">
+      <div className="w-full max-w-md bg-white rounded-2xl border border-neutral-200 p-6 text-center">
         {status === "confirming" && (
           <>
-            <Loader2 size={32} className="mx-auto mb-3 animate-spin text-[var(--accent)]" />
-            <div className="text-[13px] font-semibold mb-1">결제 승인 중</div>
-            <div className="text-[10px] text-[var(--muted)]">{message}</div>
+            <Loader2 size={40} className="mx-auto mb-4 animate-spin text-[#d43e76]" strokeWidth={2} />
+            <div className="iso-eyebrow-muted mb-3">PROCESSING</div>
+            <h1 className="text-[22px] font-bold tracking-tight mb-2">결제 승인 중</h1>
+            <p className="text-[13px] text-neutral-500">{message}</p>
           </>
         )}
         {status === "ok" && result && (
           <>
-            <CheckCircle2 size={36} className="mx-auto mb-3 text-[var(--success)]" />
-            <div className="text-[14px] font-semibold mb-1">충전 완료</div>
-            <div className="text-[11px] text-[var(--ink-3)] mb-4">
-              +{result.quota_granted}회 · 현재 잔액 {result.balance}회
+            <div className="w-14 h-14 rounded-full bg-emerald-50 flex items-center justify-center mx-auto mb-4">
+              <CheckCircle2 size={28} className="text-emerald-500" strokeWidth={2} />
             </div>
+            <div className="iso-eyebrow mb-3">✓ CHARGED</div>
+            <h1 className="iso-display text-[28px] mb-2">충전 완료</h1>
+            <div className="flex items-baseline justify-center gap-2 mb-2">
+              <span className="text-[32px] font-bold tracking-tight text-[#d43e76]">+{result.quota_granted}</span>
+              <span className="text-[15px] text-neutral-500">회</span>
+            </div>
+            <p className="text-[13px] text-neutral-500 mb-6">
+              현재 잔액 <span className="font-bold text-neutral-900">{result.balance}회</span>
+            </p>
             {result.receipt_url && (
               <a
                 href={result.receipt_url}
                 target="_blank"
                 rel="noreferrer"
-                className="block text-[10px] text-[var(--accent)] underline mb-3"
+                className="inline-flex items-center gap-1 text-[12px] text-[#d43e76] hover:underline mb-5"
               >
-                영수증 보기
+                영수증 보기 <ExternalLink size={11} />
               </a>
             )}
-            <button
-              onClick={() => router.push("/")}
-              className="w-full h-[34px] bg-[var(--ink)] text-[var(--surface)] rounded-lg text-[11px] font-medium"
-            >
-              렌더링 시작하기
-            </button>
-            <button
-              onClick={() => router.push("/billing")}
-              className="w-full h-[30px] mt-2 text-[10px] text-[var(--muted)] hover:text-[var(--ink)]"
-            >
-              결제 내역 보기
-            </button>
+            <div className="space-y-2 pt-3 border-t border-neutral-900">
+              {fromApp ? (
+                <>
+                  <Button
+                    onClick={returnToApp}
+                    disabled={returning}
+                    className="w-full h-11 bg-neutral-900 hover:bg-[#d43e76] text-white text-[12px] font-bold uppercase tracking-[0.05em] rounded-lg"
+                  >
+                    {returning ? (
+                      <>
+                        <Loader2 size={14} className="mr-1.5 animate-spin" />
+                        준비 중…
+                      </>
+                    ) : (
+                      <>
+                        <Smartphone size={14} className="mr-1.5" />
+                        앱으로 돌아가기 →
+                      </>
+                    )}
+                  </Button>
+                  {returnError ? (
+                    <p className="text-[11px] text-red-600 mt-1">{returnError}</p>
+                  ) : (
+                    <p className="text-[11px] text-neutral-400">
+                      앱이 열리지 않으면 홈 화면에서 칸막이Go 앱을 열어주세요.
+                    </p>
+                  )}
+                </>
+              ) : (
+                <>
+                  <Button
+                    onClick={() => router.push("/")}
+                    className="w-full h-11 bg-neutral-900 hover:bg-[#d43e76] text-white text-[12px] font-bold uppercase tracking-[0.05em] rounded-lg"
+                  >
+                    렌더링 시작하기 →
+                  </Button>
+                  <button
+                    onClick={() => router.push("/billing")}
+                    className="w-full h-9 text-[12px] text-neutral-500 hover:text-[#d43e76]"
+                  >
+                    결제 내역 보기
+                  </button>
+                </>
+              )}
+            </div>
           </>
         )}
         {status === "error" && (
           <>
-            <AlertCircle size={32} className="mx-auto mb-3 text-[var(--danger)]" />
-            <div className="text-[13px] font-semibold mb-1">결제 처리 오류</div>
-            <div className="text-[10px] text-[var(--muted)] mb-4">{message}</div>
-            <button
+            <div className="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4">
+              <AlertCircle size={28} className="text-red-500" strokeWidth={2} />
+            </div>
+            <div className="iso-eyebrow-muted mb-3">FAILED</div>
+            <h1 className="text-[22px] font-bold tracking-tight mb-2">결제 처리 오류</h1>
+            <p className="text-[12px] text-neutral-500 mb-6">{message}</p>
+            <Button
               onClick={() => router.push("/pricing")}
-              className="w-full h-[34px] bg-[var(--ink)] text-[var(--surface)] rounded-lg text-[11px] font-medium"
+              className="w-full h-11 bg-neutral-900 hover:bg-[#d43e76] text-white text-[12px] font-bold uppercase tracking-[0.05em] rounded-lg"
             >
               다시 시도
-            </button>
+            </Button>
           </>
         )}
+      </div>
       </div>
     </main>
   );

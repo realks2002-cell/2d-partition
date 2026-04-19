@@ -6,6 +6,8 @@ import Link from "next/link";
 import { useSession } from "@/lib/store";
 import { resizeImageFile } from "@/lib/image";
 import { Camera, ArrowLeft } from "lucide-react";
+import { useCameraGate } from "@/lib/use-camera-gate";
+import PermissionIntroModal from "@/components/PermissionIntroModal";
 
 export default function CapturePage() {
   const router = useRouter();
@@ -13,6 +15,7 @@ export default function CapturePage() {
   const dimension = useSession((s) => s.dimension);
   const fileRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
+  const gate = useCameraGate();
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
@@ -60,7 +63,7 @@ export default function CapturePage() {
 
       <div className="flex-1 min-h-0 flex items-center justify-center rise rise-2">
         <button
-          onClick={() => fileRef.current?.click()}
+          onClick={() => gate.triggerCamera(() => fileRef.current?.click())}
           disabled={busy}
           className="flex flex-col items-center gap-5 active:scale-95 transition disabled:opacity-50"
         >
@@ -83,6 +86,12 @@ export default function CapturePage() {
         <span className="text-[11px] text-[var(--muted)]">비즈스타트</span>
         <span className="mono text-[11px] text-[var(--muted)]">© 2026</span>
       </footer>
+
+      <PermissionIntroModal
+        open={gate.open}
+        onAllow={gate.allow}
+        onCancel={gate.cancel}
+      />
     </main>
   );
 }

@@ -43,3 +43,6 @@ next-env.d.ts
 # scratch test images
 *.jpeg
 Gemini_Generated_Image_*.png
+
+# Design system reference (not source)
+/ISOPLAN 3D Design System/

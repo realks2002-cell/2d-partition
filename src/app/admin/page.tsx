@@ -14,6 +14,7 @@ import {
   Search,
   Receipt,
   Zap,
+  Image as ImageIcon,
 } from "lucide-react";
 import { apiUrl, authHeaders, getUser, clearToken } from "@/lib/api-client";
 
@@ -81,7 +82,7 @@ export default function AdminPage() {
 
   useEffect(() => {
     const u = getUser();
-    if (!u || u.role !== "admin") { router.replace("/"); return; }
+    if (!u || u.role !== "admin") { router.replace("/admin/login"); return; }
     fetchUsers();
   }, [fetchUsers, router]);
 
@@ -196,167 +197,253 @@ export default function AdminPage() {
   };
 
   if (loading) {
-    return <div className="h-[100dvh] flex items-center justify-center"><div className="text-[var(--muted)]">불러오는 중…</div></div>;
+    return (
+      <div className="h-[100dvh] flex items-center justify-center bg-neutral-50">
+        <div className="text-[13px] text-neutral-500">불러오는 중…</div>
+      </div>
+    );
   }
 
-  const inputCls = "w-full h-[26px] px-2 text-[9px] bg-[var(--surface)] border border-[var(--line-2)] rounded-md focus:outline-none focus:border-[var(--ink)] transition-colors";
-  const editInputCls = "w-full h-[22px] px-1.5 text-[8px] bg-[var(--surface)] border border-[var(--line-2)] rounded focus:outline-none focus:border-[var(--ink)]";
+  const inputCls = "w-full h-[28px] px-2 text-[11px] bg-white border border-neutral-300 rounded-md focus:outline-none focus:border-neutral-900 transition-colors";
+  const editInputCls = "w-full h-[24px] px-1.5 text-[10px] bg-white border border-neutral-300 rounded focus:outline-none focus:border-neutral-900";
+
+  const stats = {
+    total: users.length,
+    active: users.filter((u) => u.status === "active").length,
+    pending: users.filter((u) => u.status === "pending").length,
+    blocked: users.filter((u) => u.status === "blocked").length,
+  };
 
   return (
-    <main className="min-h-[100dvh] mx-auto px-5 pt-safe pb-safe" style={{ maxWidth: 1400 }}>
-      {/* 헤더 */}
-      <header className="flex items-center justify-between py-2">
-        <div className="flex items-center gap-1.5">
-          <Shield size={12} />
-          <span className="font-semibold text-[11px]">회원 관리</span>
+    <main className="min-h-[100dvh] bg-neutral-50 text-neutral-900 pt-safe pb-safe">
+      {/* Top bar */}
+      <div className="sticky top-0 z-40 bg-white border-b border-neutral-200">
+        <div className="mx-auto flex items-center justify-between px-5 h-14" style={{ maxWidth: 1120 }}>
+          <div className="flex items-center gap-3">
+            <div className="flex items-baseline gap-2">
+              <span className="text-[20px] font-bold tracking-tight">칸막이Go</span>
+              <span className="iso-eyebrow">ADMIN</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => { setShowAdd(true); setAddForm(EMPTY_FORM); setError(""); }}
+              className="inline-flex items-center gap-1 px-3 h-8 bg-neutral-900 hover:bg-[#d43e76] text-white text-[11px] font-bold uppercase tracking-[0.05em] rounded-md transition-colors"
+            >
+              <Plus size={11} /> 회원 추가
+            </button>
+            <button
+              onClick={() => router.push("/admin/payments")}
+              className="inline-flex items-center gap-1 px-3 h-8 border border-neutral-300 hover:border-neutral-900 hover:text-[#d43e76] text-[11px] font-semibold rounded-md transition-colors"
+            >
+              <Receipt size={11} /> 결제
+            </button>
+            <button
+              onClick={() => router.push("/admin/showcases")}
+              className="inline-flex items-center gap-1 px-3 h-8 border border-neutral-300 hover:border-neutral-900 hover:text-[#d43e76] text-[11px] font-semibold rounded-md transition-colors"
+            >
+              <ImageIcon size={11} /> 쇼케이스
+            </button>
+            <button
+              onClick={() => router.push("/admin/push")}
+              className="inline-flex items-center gap-1 px-3 h-8 border border-neutral-300 hover:border-neutral-900 hover:text-[#d43e76] text-[11px] font-semibold rounded-md transition-colors"
+            >
+              <Bell size={11} /> 푸시
+            </button>
+            <button
+              onClick={() => router.push("/")}
+              className="inline-flex items-center px-3 h-8 text-[11px] font-semibold text-neutral-600 hover:text-[#d43e76] rounded-md transition-colors"
+            >
+              앱으로 →
+            </button>
+            <button
+              onClick={handleLogout}
+              className="w-8 h-8 rounded-md border border-neutral-300 hover:border-neutral-900 hover:text-[#d43e76] flex items-center justify-center transition-colors"
+            >
+              <LogOut size={12} />
+            </button>
+          </div>
         </div>
-        <div className="flex items-center gap-1">
-          <button onClick={() => { setShowAdd(true); setAddForm(EMPTY_FORM); setError(""); }}
-            className="inline-flex items-center gap-1 px-2 h-[23px] bg-[var(--ink)] text-[var(--surface)] text-[8px] font-medium rounded-md">
-            <Plus size={9} /> 회원 추가
-          </button>
-          <button onClick={() => router.push("/admin/payments")}
-            className="inline-flex items-center gap-1 px-2 h-[23px] border border-[var(--line-2)] text-[8px] font-medium rounded-md hover:bg-[var(--surface-2)]">
-            <Receipt size={9} /> 결제
-          </button>
-          <button onClick={() => router.push("/admin/push")}
-            className="inline-flex items-center gap-1 px-2 h-[23px] border border-[var(--line-2)] text-[8px] font-medium rounded-md hover:bg-[var(--surface-2)]">
-            <Bell size={9} /> 푸시
-          </button>
-          <button onClick={() => router.push("/")}
-            className="inline-flex items-center px-1.5 h-[23px] text-[8px] rounded-md hover:bg-[var(--surface-2)]">앱으로</button>
-          <button onClick={handleLogout}
-            className="inline-flex items-center px-1 h-[23px] rounded-md hover:bg-[var(--surface-2)]"><LogOut size={10} /></button>
-        </div>
-      </header>
-
-      {/* 필터 바 */}
-      <div className="flex items-center gap-1.5 py-2 border-y border-[var(--line)]">
-        <div className="relative">
-          <Search size={10} className="absolute left-2 top-1/2 -translate-y-1/2 text-[var(--muted)]" />
-          <input type="text" placeholder="이름, 전화번호 검색..." value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className={`${inputCls} !pl-6`} style={{ width: 150 }} />
-        </div>
-        <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)}
-          className={inputCls} style={{ width: 130 }} />
-        <span className="text-[var(--muted)] text-[9px]">~</span>
-        <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)}
-          className={inputCls} style={{ width: 130 }} />
-        <select value={regionFilter} onChange={(e) => setRegionFilter(e.target.value)}
-          className={inputCls} style={{ width: 110 }}>
-          <option value="">전체 지역</option>
-          {REGIONS.map((r) => <option key={r} value={r}>{r}</option>)}
-        </select>
-        <div className="flex-1" />
-        <span className="text-[9px] text-[var(--muted)]">{filtered.length}건</span>
       </div>
 
-      {error && (
-        <div className="mt-1.5 p-2 bg-[var(--accent-tint)] text-[var(--danger)] text-[8px] rounded-md">{error}</div>
-      )}
-
-      {/* 회원 추가 폼 */}
-      {showAdd && (
-        <div className="mt-2 bg-[var(--surface)] border border-[var(--line)] rounded-lg p-3">
-          <div className="flex items-center justify-between mb-2">
-            <span className="font-medium text-[9px]">새 회원 추가</span>
-            <button onClick={() => setShowAdd(false)} className="p-0.5 rounded hover:bg-[var(--surface-2)]"><X size={10} /></button>
+      <div className="mx-auto px-5 py-6" style={{ maxWidth: 1120 }}>
+        {/* Page header */}
+        <div className="flex items-end justify-between mb-6">
+          <div>
+            <div className="iso-eyebrow mb-2">MEMBERS · MANAGEMENT</div>
+            <h1 className="iso-h1 text-[22px]">회원 관리</h1>
           </div>
-          <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
-            {[
-              { label: "아이디 *", key: "login_id", ph: "아이디" },
-              { label: "비밀번호 *", key: "password", ph: "비밀번호" },
-              { label: "이름 *", key: "name", ph: "이름" },
-              { label: "전화번호 *", key: "phone", ph: "010-0000-0000" },
-              { label: "메모", key: "memo", ph: "간단메모" },
-              { label: "이메일 *", key: "email", ph: "email@example.com" },
-              { label: "상호명", key: "company", ph: "선택" },
-            ].map(({ label, key, ph }) => (
-              <div key={key}>
-                <label className="block text-[8px] font-medium text-[var(--ink-3)] mb-0.5">{label}</label>
-                <input className={inputCls} placeholder={ph}
-                  value={addForm[key as keyof typeof addForm]}
-                  onChange={(e) => setAddForm((p) => ({ ...p, [key]: e.target.value }))} />
-              </div>
-            ))}
-            <div>
-              <label className="block text-[8px] font-medium text-[var(--ink-3)] mb-0.5">종료일</label>
-              <input type="date" className={inputCls} value={addForm.expired_at}
-                onChange={(e) => setAddForm((p) => ({ ...p, expired_at: e.target.value }))} />
-            </div>
-            <div>
-              <label className="block text-[8px] font-medium text-[var(--ink-3)] mb-0.5">지역 *</label>
-              <select className={inputCls} value={addForm.region}
-                onChange={(e) => setAddForm((p) => ({ ...p, region: e.target.value }))}>
-                <option value="">선택</option>
-                {REGIONS.map((r) => <option key={r} value={r}>{r}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block text-[8px] font-medium text-[var(--ink-3)] mb-0.5">상태</label>
-              <select className={inputCls} value={addForm.status}
-                onChange={(e) => setAddForm((p) => ({ ...p, status: e.target.value }))}>
-                <option value="active">활성</option>
-                <option value="pending">대기</option>
-              </select>
-            </div>
-          </div>
-          <button onClick={addUser}
-            className="inline-flex items-center gap-1 px-2 h-[23px] bg-[var(--ink)] text-[var(--surface)] text-[8px] font-medium rounded-md mt-2">
-            <Plus size={9} /> 추가하기
-          </button>
         </div>
-      )}
 
-      {/* 테이블 */}
-      <div className="overflow-x-auto mt-1 pb-8">
-        <table className="w-full text-[9px]" style={{ minWidth: 1100 }}>
-          <thead>
-            <tr className="border-b border-[var(--line)] text-center text-[var(--ink-3)]">
-              <th className="py-2 px-1.5 font-medium w-6">#</th>
-              <th className="py-2 px-1.5 font-medium text-left">아이디</th>
-              <th className="py-2 px-1.5 font-medium text-left">비번</th>
-              <th className="py-2 px-1.5 font-medium text-left">이름</th>
-              <th className="py-2 px-1.5 font-medium text-left">전화번호</th>
-              <th className="py-2 px-1.5 font-medium text-left" style={{ width: "14%" }}>간단 메모</th>
-              <th className="py-2 px-1.5 font-medium text-left">이메일</th>
-              <th className="py-2 px-1.5 font-medium text-left">상호명</th>
-              <th className="py-2 px-1.5 font-medium text-left">지역</th>
-              <th className="py-2 px-1.5 font-medium">가입일</th>
-              <th className="py-2 px-1.5 font-medium">잔여</th>
-              <th className="py-2 px-1.5 font-medium">종료일</th>
-              <th className="py-2 px-1.5 font-medium">상태</th>
-              <th className="py-2 px-1.5 font-medium">처리</th>
-            </tr>
-          </thead>
+        {/* Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+          <div className="bg-white rounded-xl border border-neutral-200 p-4">
+            <div className="iso-eyebrow-muted mb-1">TOTAL</div>
+            <div className="text-[21px] font-bold tracking-tight">{stats.total}</div>
+          </div>
+          <div className="bg-white rounded-xl border border-neutral-200 p-4">
+            <div className="iso-eyebrow-muted mb-1">ACTIVE</div>
+            <div className="text-[21px] font-bold tracking-tight text-emerald-600">{stats.active}</div>
+          </div>
+          <div className="bg-white rounded-xl border border-neutral-200 p-4">
+            <div className="iso-eyebrow-muted mb-1">PENDING</div>
+            <div className="text-[21px] font-bold tracking-tight text-neutral-500">{stats.pending}</div>
+          </div>
+          <div className="bg-white rounded-xl border border-neutral-200 p-4">
+            <div className="iso-eyebrow-muted mb-1">BLOCKED</div>
+            <div className="text-[21px] font-bold tracking-tight text-red-600">{stats.blocked}</div>
+          </div>
+        </div>
+
+        {/* 필터 바 */}
+        <div className="flex items-center gap-2 py-3 bg-white border border-neutral-200 rounded-xl px-3 mb-4">
+          <div className="relative">
+            <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-400" />
+            <input
+              type="text"
+              placeholder="이름 · 아이디 · 전화 · 이메일"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className={`${inputCls} pl-7`}
+              style={{ width: 220 }}
+            />
+          </div>
+          <input
+            type="date"
+            value={dateFrom}
+            onChange={(e) => setDateFrom(e.target.value)}
+            className={inputCls}
+            style={{ width: 140 }}
+          />
+          <span className="text-neutral-400 text-[11px]">~</span>
+          <input
+            type="date"
+            value={dateTo}
+            onChange={(e) => setDateTo(e.target.value)}
+            className={inputCls}
+            style={{ width: 140 }}
+          />
+          <select
+            value={regionFilter}
+            onChange={(e) => setRegionFilter(e.target.value)}
+            className={inputCls}
+            style={{ width: 120 }}
+          >
+            <option value="">전체 지역</option>
+            {REGIONS.map((r) => <option key={r} value={r}>{r}</option>)}
+          </select>
+          <div className="flex-1" />
+          <span className="text-[11px] text-neutral-500 font-medium">{filtered.length}건</span>
+        </div>
+
+        {error && (
+          <div className="mb-3 px-3 py-2 bg-red-50 border border-red-200 text-red-700 text-[12px] rounded-md">{error}</div>
+        )}
+
+        {/* 회원 추가 폼 */}
+        {showAdd && (
+          <div className="mb-4 bg-white border border-neutral-200 rounded-xl p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <div className="iso-eyebrow-muted mb-0.5">NEW MEMBER</div>
+                <span className="font-bold text-[14px]">새 회원 추가</span>
+              </div>
+              <button onClick={() => setShowAdd(false)} className="w-7 h-7 rounded-md hover:bg-neutral-100 flex items-center justify-center"><X size={14} /></button>
+            </div>
+            <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
+              {[
+                { label: "아이디 *", key: "login_id", ph: "아이디" },
+                { label: "비밀번호 *", key: "password", ph: "비밀번호" },
+                { label: "이름 *", key: "name", ph: "이름" },
+                { label: "전화번호 *", key: "phone", ph: "010-0000-0000" },
+                { label: "메모", key: "memo", ph: "간단메모" },
+                { label: "이메일 *", key: "email", ph: "email@example.com" },
+                { label: "상호명", key: "company", ph: "선택" },
+              ].map(({ label, key, ph }) => (
+                <div key={key}>
+                  <label className="block text-[11px] font-semibold text-neutral-700 mb-1">{label}</label>
+                  <input className={inputCls} placeholder={ph}
+                    value={addForm[key as keyof typeof addForm]}
+                    onChange={(e) => setAddForm((p) => ({ ...p, [key]: e.target.value }))} />
+                </div>
+              ))}
+              <div>
+                <label className="block text-[11px] font-semibold text-neutral-700 mb-1">종료일</label>
+                <input type="date" className={inputCls} value={addForm.expired_at}
+                  onChange={(e) => setAddForm((p) => ({ ...p, expired_at: e.target.value }))} />
+              </div>
+              <div>
+                <label className="block text-[11px] font-semibold text-neutral-700 mb-1">지역 *</label>
+                <select className={inputCls} value={addForm.region}
+                  onChange={(e) => setAddForm((p) => ({ ...p, region: e.target.value }))}>
+                  <option value="">선택</option>
+                  {REGIONS.map((r) => <option key={r} value={r}>{r}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-[11px] font-semibold text-neutral-700 mb-1">상태</label>
+                <select className={inputCls} value={addForm.status}
+                  onChange={(e) => setAddForm((p) => ({ ...p, status: e.target.value }))}>
+                  <option value="active">활성</option>
+                  <option value="pending">대기</option>
+                </select>
+              </div>
+            </div>
+            <button onClick={addUser}
+              className="inline-flex items-center gap-1 px-3 h-8 bg-neutral-900 hover:bg-[#d43e76] text-white text-[11px] font-bold uppercase tracking-[0.05em] rounded-md mt-4 transition-colors">
+              <Plus size={11} /> 추가하기 →
+            </button>
+          </div>
+        )}
+
+        {/* 테이블 */}
+        <div className="bg-white border border-neutral-200 overflow-x-auto">
+          <table className="w-full text-[11px]" style={{ minWidth: 1100 }}>
+            <thead>
+              <tr className="border-b border-neutral-200 text-center bg-neutral-50 text-neutral-500">
+                <th className="py-2.5 px-1.5 font-semibold w-8 text-[10px] uppercase tracking-[0.05em]">#</th>
+                <th className="py-2.5 px-1.5 font-semibold text-left text-[10px] uppercase tracking-[0.05em]">아이디</th>
+                <th className="py-2.5 px-1.5 font-semibold text-left text-[10px] uppercase tracking-[0.05em]">비번</th>
+                <th className="py-2.5 px-1.5 font-semibold text-left text-[10px] uppercase tracking-[0.05em]">이름</th>
+                <th className="py-2.5 px-1.5 font-semibold text-left text-[10px] uppercase tracking-[0.05em]">전화</th>
+                <th className="py-2.5 px-1.5 font-semibold text-left text-[10px] uppercase tracking-[0.05em]" style={{ width: "12%" }}>메모</th>
+                <th className="py-2.5 px-1.5 font-semibold text-left text-[10px] uppercase tracking-[0.05em]">이메일</th>
+                <th className="py-2.5 px-1.5 font-semibold text-left text-[10px] uppercase tracking-[0.05em]">상호명</th>
+                <th className="py-2.5 px-1.5 font-semibold text-left text-[10px] uppercase tracking-[0.05em]">지역</th>
+                <th className="py-2.5 px-1.5 font-semibold text-[10px] uppercase tracking-[0.05em]">가입</th>
+                <th className="py-2.5 px-1.5 font-semibold text-[10px] uppercase tracking-[0.05em]">잔여</th>
+                <th className="py-2.5 px-1.5 font-semibold text-[10px] uppercase tracking-[0.05em]">종료</th>
+                <th className="py-2.5 px-1.5 font-semibold text-[10px] uppercase tracking-[0.05em]">상태</th>
+                <th className="py-2.5 px-1.5 font-semibold text-[10px] uppercase tracking-[0.05em]">처리</th>
+              </tr>
+            </thead>
           <tbody>
             {filtered.map((u) => {
               const isEditing = editId === u.id;
 
               if (isEditing) {
                 return (
-                  <tr key={u.id} className="border-b border-[var(--line)] bg-[var(--surface-2)]">
-                    <td className="py-1.5 px-1.5 text-center mono text-[var(--muted)]">{u.id}</td>
+                  <tr key={u.id} className="border-b border-neutral-100 bg-neutral-50">
+                    <td className="py-2 px-1.5 text-center mono text-neutral-400 text-[10px]">{u.id}</td>
                     {(["login_id", "password", "name", "phone", "memo", "email", "company"] as const).map((k) => (
-                      <td key={k} className="py-1.5 px-1.5">
+                      <td key={k} className="py-2 px-1.5">
                         <input className={editInputCls} value={editForm[k]}
                           onChange={(e) => setEditForm((p) => ({ ...p, [k]: e.target.value }))} />
                       </td>
                     ))}
-                    <td className="py-1.5 px-1.5">
+                    <td className="py-2 px-1.5">
                       <select className={editInputCls} value={editForm.region}
                         onChange={(e) => setEditForm((p) => ({ ...p, region: e.target.value }))}>
                         {REGIONS.map((r) => <option key={r} value={r}>{r}</option>)}
                       </select>
                     </td>
-                    <td className="py-1.5 px-1.5 text-center text-[8px] text-[var(--muted)]">{fmtDate(u.created_at)}</td>
-                    <td className="py-1.5 px-1.5 text-center text-[8px] text-[var(--muted)]">{u.render_quota ?? 0}</td>
-                    <td className="py-1.5 px-1.5">
+                    <td className="py-2 px-1.5 text-center text-[10px] text-neutral-500 mono">{fmtDate(u.created_at)}</td>
+                    <td className="py-2 px-1.5 text-center text-[10px] text-neutral-500 mono">{u.render_quota ?? 0}</td>
+                    <td className="py-2 px-1.5">
                       <input type="date" className={editInputCls} value={editForm.expired_at}
                         onChange={(e) => setEditForm((p) => ({ ...p, expired_at: e.target.value }))} />
                     </td>
-                    <td className="py-1.5 px-1.5 text-center">
+                    <td className="py-2 px-1.5 text-center">
                       <select className={editInputCls} value={editForm.status}
                         onChange={(e) => setEditForm((p) => ({ ...p, status: e.target.value }))}>
                         <option value="active">활성</option>
@@ -364,13 +451,13 @@ export default function AdminPage() {
                         <option value="blocked">차단</option>
                       </select>
                     </td>
-                    <td className="py-1.5 px-1.5">
-                      <div className="flex items-center justify-center gap-1">
-                        <button onClick={saveEdit} className="text-[var(--success)] hover:scale-110 transition-transform" title="저장">
-                          <Save size={12} />
+                    <td className="py-2 px-1.5">
+                      <div className="flex items-center justify-center gap-1.5">
+                        <button onClick={saveEdit} className="text-emerald-600 hover:scale-110 transition-transform" title="저장">
+                          <Save size={13} />
                         </button>
-                        <button onClick={() => setEditId(null)} className="text-[var(--muted)] hover:scale-110 transition-transform" title="취소">
-                          <X size={12} />
+                        <button onClick={() => setEditId(null)} className="text-neutral-400 hover:text-neutral-900 hover:scale-110 transition-transform" title="취소">
+                          <X size={13} />
                         </button>
                       </div>
                     </td>
@@ -378,16 +465,22 @@ export default function AdminPage() {
                 );
               }
 
+              const statusBadge = u.status === "active"
+                ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                : u.status === "blocked"
+                ? "bg-red-50 text-red-700 border-red-200"
+                : "bg-neutral-100 text-neutral-500 border-neutral-200";
+
               return (
-                <tr key={u.id} className="border-b border-[var(--line)] hover:bg-[var(--surface-2)] transition-colors">
-                  <td className="py-2.5 px-1.5 text-center mono text-[var(--muted)]">{u.id}</td>
-                  <td className="py-2.5 px-1.5 font-medium">{u.login_id}</td>
-                  <td className="py-2.5 px-1.5 mono text-[var(--ink-3)]">{u.password}</td>
-                  <td className="py-2.5 px-1.5 text-[var(--accent)] font-medium">{u.name}</td>
-                  <td className="py-2.5 px-1.5 mono">{u.phone}</td>
+                <tr key={u.id} className="border-b border-neutral-100 hover:bg-neutral-50 transition-colors">
+                  <td className="py-2.5 px-1.5 text-center mono text-neutral-400 text-[10px]">{u.id}</td>
+                  <td className="py-2.5 px-1.5 font-semibold">{u.login_id}</td>
+                  <td className="py-2.5 px-1.5 mono text-neutral-500 text-[10px]">{u.password}</td>
+                  <td className="py-2.5 px-1.5 text-[#d43e76] font-semibold">{u.name}</td>
+                  <td className="py-2.5 px-1.5 mono text-[10px] text-neutral-600">{u.phone}</td>
                   <td className="py-1 px-1">
                     <input
-                      className="w-full h-[22px] px-1.5 text-[8px] bg-transparent border border-transparent rounded hover:border-[var(--line-2)] focus:border-[var(--ink)] focus:bg-[var(--surface)] outline-none transition-colors"
+                      className="w-full h-[24px] px-1.5 text-[10px] bg-transparent border border-transparent rounded hover:border-neutral-300 focus:border-neutral-900 focus:bg-white outline-none transition-colors"
                       defaultValue={u.memo || ""}
                       placeholder="메모 입력"
                       onBlur={(e) => {
@@ -399,35 +492,39 @@ export default function AdminPage() {
                       onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
                     />
                   </td>
-                  <td className="py-2.5 px-1.5">{u.email}</td>
-                  <td className="py-2.5 px-1.5 text-[var(--muted)]">{u.company || "-"}</td>
-                  <td className="py-2.5 px-1.5">{u.region}</td>
-                  <td className="py-2.5 px-1.5 text-center text-[8px] text-[var(--muted)]">{fmtDate(u.created_at)}</td>
-                  <td className="py-2.5 px-1.5 text-center font-medium">
-                    <span className={u.render_quota !== undefined && u.render_quota <= 3 ? "text-[var(--danger)]" : ""}>
+                  <td className="py-2.5 px-1.5 text-neutral-600 text-[10px]">{u.email}</td>
+                  <td className="py-2.5 px-1.5 text-neutral-400 text-[10px]">{u.company || "-"}</td>
+                  <td className="py-2.5 px-1.5 text-neutral-600">{u.region}</td>
+                  <td className="py-2.5 px-1.5 text-center text-[10px] text-neutral-500 mono">{fmtDate(u.created_at)}</td>
+                  <td className="py-2.5 px-1.5 text-center font-bold">
+                    <span className={u.render_quota !== undefined && u.render_quota <= 3 ? "text-red-600" : "text-neutral-900"}>
                       {u.render_quota ?? 0}
                     </span>
                   </td>
-                  <td className="py-2.5 px-1.5 text-center text-[8px] text-[var(--muted)]">{u.expired_at ? u.expired_at.slice(0, 10) : "-"}</td>
-                  <td className={`py-2.5 px-1.5 text-center font-medium ${statusCls(u.status)}`}>{statusText(u.status)}</td>
+                  <td className="py-2.5 px-1.5 text-center text-[10px] text-neutral-500 mono">{u.expired_at ? u.expired_at.slice(0, 10) : "-"}</td>
+                  <td className="py-2.5 px-1.5 text-center">
+                    <span className={`inline-block px-2 py-0.5 border rounded-full text-[9px] font-semibold ${statusBadge}`}>
+                      {statusText(u.status)}
+                    </span>
+                  </td>
                   <td className="py-2.5 px-1.5">
                     {u.role !== "admin" ? (
                       <div className="flex items-center justify-center gap-1.5">
                         <button onClick={() => adjustQuota(u.id, u.name)}
-                          className="text-[var(--accent)] hover:scale-110 transition-transform" title="횟수 조정">
-                          <Zap size={12} />
+                          className="text-[#d43e76] hover:scale-110 transition-transform" title="횟수 조정">
+                          <Zap size={13} />
                         </button>
                         <button onClick={() => startEdit(u)}
-                          className="text-[var(--muted)] hover:text-[var(--ink)] hover:scale-110 transition-transform" title="편집">
-                          <Pencil size={12} />
+                          className="text-neutral-500 hover:text-neutral-900 hover:scale-110 transition-transform" title="편집">
+                          <Pencil size={13} />
                         </button>
                         <button onClick={() => deleteUser(u.id, u.login_id)}
                           className="text-red-400 hover:text-red-600 hover:scale-110 transition-transform" title="삭제">
-                          <Trash2 size={12} />
+                          <Trash2 size={13} />
                         </button>
                       </div>
                     ) : (
-                      <span className="text-[8px] text-[var(--muted)]">관리자</span>
+                      <span className="text-[10px] text-neutral-400 italic">admin</span>
                     )}
                   </td>
                 </tr>
@@ -435,6 +532,7 @@ export default function AdminPage() {
             })}
           </tbody>
         </table>
+        </div>
       </div>
     </main>
   );
