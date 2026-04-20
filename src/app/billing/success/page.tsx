@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle2, Loader2, AlertCircle, ExternalLink, Smartphone } from "lucide-react";
 import { apiUrl, authHeaders } from "@/lib/api-client";
@@ -9,7 +9,7 @@ import SiteHeader from "@/components/SiteHeader";
 
 const DEEP_LINK_SUCCESS = "kanmakigo://payment/success";
 
-export default function PaymentSuccessPage() {
+function SuccessContent() {
   const router = useRouter();
   const sp = useSearchParams();
   const [status, setStatus] = useState<"confirming" | "ok" | "error">("confirming");
@@ -70,9 +70,7 @@ export default function PaymentSuccessPage() {
   };
 
   return (
-    <main className="min-h-[100dvh] bg-neutral-50 flex flex-col">
-      <SiteHeader />
-      <div className="flex-1 flex items-center justify-center px-6 py-16">
+    <div className="flex-1 flex items-center justify-center px-6 py-16">
       <div className="w-full max-w-md bg-white rounded-2xl border border-neutral-200 p-6 text-center">
         {status === "confirming" && (
           <>
@@ -170,7 +168,17 @@ export default function PaymentSuccessPage() {
           </>
         )}
       </div>
-      </div>
+    </div>
+  );
+}
+
+export default function PaymentSuccessPage() {
+  return (
+    <main className="min-h-[100dvh] bg-neutral-50 flex flex-col">
+      <SiteHeader />
+      <Suspense fallback={<div className="flex-1" />}>
+        <SuccessContent />
+      </Suspense>
     </main>
   );
 }

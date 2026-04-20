@@ -1,20 +1,19 @@
 "use client";
 
+import { Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SiteHeader from "@/components/SiteHeader";
 
-export default function PaymentFailPage() {
+function FailContent() {
   const router = useRouter();
   const sp = useSearchParams();
   const code = sp.get("code") ?? "";
   const message = sp.get("message") ?? "결제가 취소되었거나 실패했습니다";
 
   return (
-    <main className="min-h-[100dvh] bg-neutral-50 flex flex-col">
-      <SiteHeader />
-      <div className="flex-1 flex items-center justify-center px-6 py-16">
+    <div className="flex-1 flex items-center justify-center px-6 py-16">
       <div className="w-full max-w-md bg-white rounded-2xl border border-neutral-200 p-6 text-center">
         <div className="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4">
           <AlertCircle size={28} className="text-red-500" strokeWidth={2} />
@@ -39,7 +38,17 @@ export default function PaymentFailPage() {
           </button>
         </div>
       </div>
-      </div>
+    </div>
+  );
+}
+
+export default function PaymentFailPage() {
+  return (
+    <main className="min-h-[100dvh] bg-neutral-50 flex flex-col">
+      <SiteHeader />
+      <Suspense fallback={<div className="flex-1" />}>
+        <FailContent />
+      </Suspense>
     </main>
   );
 }
